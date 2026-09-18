@@ -1,27 +1,26 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '@/types/database.types';
+import { resolveEntitlements, type Entitlements } from '@/lib/billing/entitlements';
 
-// Trial users have no plan_id until they pick one at checkout (Phase 6).
-// They get the cheapest plan's Page allowance in the meantime.
-export const TRIAL_MAX_PAGES = 1;
-export const TRIAL_MAX_POSTS_PER_DAY = 3;
+export { TRIAL_MAX_PAGES, TRIAL_MAX_POSTS_PER_DAY } from '@/lib/billing/entitlements';
 
-interface PlanLimits {
-  maxPages: number;
-  maxPostsPerDay: number;
-}
-
-async function getPlanLimits(
+/** The single place that answers "what is this business allowed to do?". */
+export async function getEntitlements(
   supabase: SupabaseClient<Database>,
   businessId: string
-): Promise<PlanLimits> {
+): Promise<Entitlements> {
   const { data: subscription } = await supabase
     .from('subscriptions')
-    .select('status, plan_id')
+    .select('status, plan_id, trial_ends_at')
     .eq('business_id', businessId)
     .maybeSingle();
 
-  if (subscription?.plan_id) {
+  if (!subscription) {
+    return resolveEntitlements({ status: null, planLimits: null, trialEndsAt: null });
+  }
+
+  let planLimits = null;
+  if (subscription.plan_id) {
     const { data: plan } = await supabase
       .from('plans')
       .select('max_pages, max_posts_per_day')
@@ -29,27 +28,27 @@ async function getPlanLimits(
       .maybeSingle();
 
     if (plan) {
-      return { maxPages: plan.max_pages, maxPostsPerDay: plan.max_posts_per_day };
+      planLimits = { maxPages: plan.max_pages, maxPostsPerDay: plan.max_posts_per_day };
     }
   }
 
-  if (subscription?.status === 'trialing') {
-    return { maxPages: TRIAL_MAX_PAGES, maxPostsPerDay: TRIAL_MAX_POSTS_PER_DAY };
-  }
-
-  return { maxPages: 0, maxPostsPerDay: 0 };
+  return resolveEntitlements({
+    status: subscription.status,
+    planLimits,
+    trialEndsAt: subscription.trial_ends_at,
+  });
 }
 
 export async function getPageLimit(
   supabase: SupabaseClient<Database>,
   businessId: string
 ): Promise<number> {
-  return (await getPlanLimits(supabase, businessId)).maxPages;
+  return (await getEntitlements(supabase, businessId)).maxPages;
 }
 
 export async function getPostsPerDayLimit(
   supabase: SupabaseClient<Database>,
   businessId: string
 ): Promise<number> {
-  return (await getPlanLimits(supabase, businessId)).maxPostsPerDay;
+  return (await getEntitlements(supabase, businessId)).maxPostsPerDay;
 }

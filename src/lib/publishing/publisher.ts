@@ -4,6 +4,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { decryptToken } from '@/lib/crypto/token-encryption';
 import { MetaGraphError, publishToPage } from '@/lib/meta/graph';
 import { logApiCall } from '@/lib/api-logs';
+import { notifyBusinessOwner } from '@/lib/notifications';
 import { composePostMessage } from '@/lib/publishing/message';
 import { decideRetry, failureMessage, MAX_PUBLISH_ATTEMPTS } from '@/lib/publishing/retry';
 import type { Database, PostStatus } from '@/types/database.types';
@@ -16,31 +17,6 @@ export interface PublishRunSummary {
   published: number;
   retrying: number;
   failed: number;
-}
-
-/** Owner lookups are cached per run — many posts share one business. */
-async function notifyOwner(
-  admin: AdminClient,
-  ownerCache: Map<string, string | null>,
-  businessId: string,
-  type: string,
-  message: string
-) {
-  let ownerId = ownerCache.get(businessId);
-
-  if (ownerId === undefined) {
-    const { data } = await admin
-      .from('businesses')
-      .select('owner_id')
-      .eq('id', businessId)
-      .maybeSingle();
-    ownerId = data?.owner_id ?? null;
-    ownerCache.set(businessId, ownerId);
-  }
-
-  if (!ownerId) return;
-
-  await admin.from('notifications').insert({ user_id: ownerId, type, message });
 }
 
 async function recordAttempt(
@@ -81,12 +57,12 @@ async function markFailed(
     .eq('id', post.id);
 
   await admin.rpc('increment_usage', { p_business_id: post.business_id, p_failed: 1 });
-  await notifyOwner(
+  await notifyBusinessOwner(
     admin,
-    ownerCache,
     post.business_id,
     'publish_failed',
-    `A post could not be published: ${message}`
+    `A post could not be published: ${message}`,
+    ownerCache
   );
 }
 
