@@ -7,6 +7,7 @@ import { logApiCall } from '@/lib/api-logs';
 import { getAIProvider } from '@/lib/ai';
 import { AIProviderError } from '@/lib/ai/provider';
 import { buildCategoryMix } from '@/lib/ai/category-mix';
+import { loadGenerationContext, loadRecentPosts } from '@/lib/ai/context';
 import { buildScheduleSlots } from '@/lib/scheduling/slots';
 import { getPostsPerDayLimit } from '@/lib/plans';
 import {
@@ -136,51 +137,36 @@ export async function generatePostsAction(
     return { error: parsed.error.issues[0]?.message ?? 'Please check your selection.' };
   }
 
-  const [{ data: business }, { data: preferences }, { data: brand }, { data: page }] =
-    await Promise.all([
-      supabase
-        .from('businesses')
-        .select(
-          'name, category, description, location, website, target_customers, products_services, main_offers, brand_tone, preferred_language, timezone'
-        )
-        .eq('id', businessId)
-        .maybeSingle(),
-      supabase
-        .from('content_preferences')
-        .select('enabled_categories, posts_per_day, posting_days, posting_times, approval_mode')
-        .eq('business_id', businessId)
-        .maybeSingle(),
-      supabase
-        .from('brand_profiles')
-        .select('preferred_cta, brand_voice, words_to_avoid')
-        .eq('business_id', businessId)
-        .maybeSingle(),
-      supabase
-        .from('facebook_pages')
-        .select('id, is_selected')
-        .eq('id', parsed.data.facebookPageId)
-        .eq('business_id', businessId)
-        .maybeSingle(),
-    ]);
+  const [context, { data: page }] = await Promise.all([
+    loadGenerationContext(supabase, businessId),
+    supabase
+      .from('facebook_pages')
+      .select('id, is_selected')
+      .eq('id', parsed.data.facebookPageId)
+      .eq('business_id', businessId)
+      .maybeSingle(),
+  ]);
 
-  if (!business || !preferences) {
+  if (!context?.preferences) {
     return { error: 'Finish setting up your business before generating content.' };
   }
+
+  const { preferences } = context;
 
   if (!page?.is_selected) {
     return { error: 'Activate a Facebook Page first, on the Facebook Pages screen.' };
   }
 
   const limit = await getPostsPerDayLimit(supabase, businessId);
-  const postsPerDay = Math.min(preferences.posts_per_day, limit);
+  const postsPerDay = Math.min(preferences.postsPerDay, limit);
   if (postsPerDay < 1) {
     return { error: 'Your plan does not include content generation right now. Check Billing.' };
   }
 
   const slots = buildScheduleSlots({
-    timezone: business.timezone,
-    postingDays: preferences.posting_days,
-    postingTimes: preferences.posting_times,
+    timezone: context.timezone,
+    postingDays: preferences.postingDays,
+    postingTimes: preferences.postingTimes,
     postsPerDay,
     days: parsed.data.days,
   });
@@ -207,20 +193,13 @@ export async function generatePostsAction(
   }
 
   // Recent history feeds both the anti-repetition prompt and the mix.
-  const { data: recent } = await supabase
-    .from('posts')
-    .select('caption, category')
-    .eq('business_id', businessId)
-    .order('created_at', { ascending: false })
-    .limit(15);
-
-  const recentRows = recent ?? [];
+  const recentRows = await loadRecentPosts(supabase, businessId);
   const recentCategories = recentRows
     .map((row) => row.category)
     .reverse() as ContentCategory[];
 
   const categories = buildCategoryMix(
-    preferences.enabled_categories,
+    preferences.enabledCategories,
     openSlots.length,
     recentCategories
   );
@@ -230,23 +209,8 @@ export async function generatePostsAction(
   let drafts;
   try {
     drafts = await provider.generatePosts({
-      business: {
-        name: business.name,
-        category: business.category,
-        description: business.description,
-        location: business.location,
-        website: business.website,
-        targetCustomers: business.target_customers,
-        productsServices: business.products_services,
-        mainOffers: business.main_offers,
-        brandTone: business.brand_tone,
-        language: business.preferred_language,
-      },
-      brand: {
-        preferredCta: brand?.preferred_cta ?? null,
-        brandVoice: brand?.brand_voice ?? null,
-        wordsToAvoid: brand?.words_to_avoid ?? [],
-      },
+      business: context.business,
+      brand: context.brand,
       categories,
       recentCaptions: recentRows.map((row) => row.caption),
     });
@@ -280,7 +244,7 @@ export async function generatePostsAction(
   }
 
   // Auto-pilot skips the review step; manual mode parks posts as drafts.
-  const status: PostStatus = preferences.approval_mode === 'auto_pilot' ? 'scheduled' : 'draft';
+  const status: PostStatus = preferences.approvalMode === 'auto_pilot' ? 'scheduled' : 'draft';
 
   const rows = drafts.map((draft, index) => ({
     business_id: businessId,

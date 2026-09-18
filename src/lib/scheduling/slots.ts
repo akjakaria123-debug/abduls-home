@@ -3,7 +3,7 @@
 // wall-clock time is converted to a UTC instant per day rather than a
 // fixed offset being applied once.
 
-interface ZonedParts {
+export interface ZonedParts {
   year: number;
   month: number;
   day: number;
@@ -12,7 +12,7 @@ interface ZonedParts {
   second: number;
 }
 
-function getZonedParts(date: Date, timeZone: string): ZonedParts {
+export function getZonedParts(date: Date, timeZone: string): ZonedParts {
   const formatter = new Intl.DateTimeFormat('en-US', {
     timeZone,
     hour12: false,
