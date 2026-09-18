@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { getPostsPerDayLimit } from '@/lib/plans';
+import { BusinessSettingsForm } from '@/components/settings/business-settings-form';
 import { ContentPreferencesForm } from '@/components/settings/content-preferences-form';
 import { BrandProfileForm } from '@/components/settings/brand-profile-form';
 
@@ -13,7 +14,9 @@ export default async function SettingsPage() {
 
   const { data: business } = await supabase
     .from('businesses')
-    .select('id, name, timezone')
+    .select(
+      'id, name, category, description, website, phone, contact_email, location, target_customers, products_services, main_offers, brand_tone, preferred_language, timezone'
+    )
     .eq('owner_id', user.id)
     .maybeSingle();
   if (!business) redirect('/onboarding');
@@ -41,6 +44,24 @@ export default async function SettingsPage() {
           {business.name} · times shown in {business.timezone}
         </p>
       </div>
+
+      <BusinessSettingsForm
+        business={{
+          name: business.name,
+          category: business.category ?? '',
+          description: business.description ?? '',
+          website: business.website ?? '',
+          phone: business.phone ?? '',
+          contactEmail: business.contact_email ?? '',
+          location: business.location ?? '',
+          targetCustomers: business.target_customers ?? '',
+          productsServices: business.products_services ?? '',
+          mainOffers: business.main_offers ?? '',
+          brandTone: business.brand_tone,
+          preferredLanguage: business.preferred_language,
+          timezone: business.timezone,
+        }}
+      />
 
       <ContentPreferencesForm
         enabledCategories={preferences?.enabled_categories ?? []}

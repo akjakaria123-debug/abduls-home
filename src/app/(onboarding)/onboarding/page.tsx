@@ -3,6 +3,8 @@
 import { useFormState } from 'react-dom';
 import { completeOnboardingAction, type OnboardingActionResult } from '@/lib/actions/onboarding';
 import { BRAND_TONES } from '@/lib/validations/onboarding';
+import { DEFAULT_LANGUAGE, ENGLISH_VARIANTS, OTHER_LANGUAGES } from '@/lib/languages';
+import { AUSTRALIAN_TIMEZONES, DEFAULT_TIMEZONE, OTHER_TIMEZONES } from '@/lib/timezones';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -13,23 +15,16 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 
 const initialState: OnboardingActionResult | null = null;
 
-const TIMEZONES = [
-  'Australia/Sydney',
-  'Australia/Melbourne',
-  'Australia/Brisbane',
-  'Australia/Perth',
-  'Australia/Adelaide',
-  'Australia/Hobart',
-  'Australia/Darwin',
-  'Pacific/Auckland',
-  'UTC',
-];
 
-const LANGUAGES = [
-  { value: 'en-AU', label: 'English (Australia)' },
-  { value: 'en-US', label: 'English (US)' },
-  { value: 'en-GB', label: 'English (UK)' },
-];
+function languageOption(language: { code: string; label: string; nativeName: string }) {
+  return (
+    <option key={language.code} value={language.code}>
+      {language.nativeName === language.label
+        ? language.label
+        : `${language.label} — ${language.nativeName}`}
+    </option>
+  );
+}
 
 function formatTone(tone: string) {
   return tone.replace('_', ' ').replace(/^\w/, (c) => c.toUpperCase());
@@ -129,22 +124,33 @@ export default function OnboardingPage() {
             </div>
             <div>
               <Label htmlFor="preferredLanguage">Language</Label>
-              <Select id="preferredLanguage" name="preferredLanguage" defaultValue="en-AU">
-                {LANGUAGES.map((l) => (
-                  <option key={l.value} value={l.value}>
-                    {l.label}
-                  </option>
-                ))}
+              <Select
+                id="preferredLanguage"
+                name="preferredLanguage"
+                defaultValue={DEFAULT_LANGUAGE}
+              >
+                <optgroup label="English">{ENGLISH_VARIANTS.map(languageOption)}</optgroup>
+                <optgroup label="Other languages">{OTHER_LANGUAGES.map(languageOption)}</optgroup>
               </Select>
+              <p className="mt-1 text-xs text-slate-400">Your posts are written in this language.</p>
             </div>
             <div>
               <Label htmlFor="timezone">Timezone</Label>
-              <Select id="timezone" name="timezone" defaultValue="Australia/Sydney">
-                {TIMEZONES.map((tz) => (
-                  <option key={tz} value={tz}>
-                    {tz}
-                  </option>
-                ))}
+              <Select id="timezone" name="timezone" defaultValue={DEFAULT_TIMEZONE}>
+                <optgroup label="Australia">
+                  {AUSTRALIAN_TIMEZONES.map((tz) => (
+                    <option key={tz} value={tz}>
+                      {tz.replace(/_/g, ' ')}
+                    </option>
+                  ))}
+                </optgroup>
+                <optgroup label="Elsewhere">
+                  {OTHER_TIMEZONES.map((tz) => (
+                    <option key={tz} value={tz}>
+                      {tz.replace(/_/g, ' ')}
+                    </option>
+                  ))}
+                </optgroup>
               </Select>
             </div>
           </CardContent>

@@ -1,4 +1,6 @@
 import { z } from 'zod';
+import { isSupportedLanguage } from '@/lib/languages';
+import { isSupportedTimezone } from '@/lib/timezones';
 
 export const BRAND_TONES = [
   'professional',
@@ -26,7 +28,9 @@ export const businessOnboardingSchema = z.object({
   productsServices: z.string().max(1000).optional().or(z.literal('')),
   mainOffers: z.string().max(500).optional().or(z.literal('')),
   brandTone: z.enum(BRAND_TONES),
-  preferredLanguage: z.string().min(2).max(10),
-  timezone: z.string().min(1, 'Select a timezone'),
+  // Checked against the catalogue so nothing unrecognised reaches the
+  // AI prompt as a language instruction.
+  preferredLanguage: z.string().refine(isSupportedLanguage, 'Choose a supported language'),
+  timezone: z.string().refine(isSupportedTimezone, 'Choose a supported timezone'),
 });
 export type BusinessOnboardingInput = z.infer<typeof businessOnboardingSchema>;

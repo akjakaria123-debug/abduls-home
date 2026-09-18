@@ -1,4 +1,5 @@
 import type { GeneratePostsInput } from '@/lib/ai/provider';
+import { describeLanguage } from '@/lib/languages';
 
 const CATEGORY_BRIEFS: Record<string, string> = {
   promotional: 'Promote a service or offer. Lead with the customer benefit, not the sales pitch.',
@@ -26,9 +27,15 @@ Hard rules you never break:
 - Never invent facts. No made-up prices, discounts, statistics, awards, opening hours, or events that the business did not give you.
 - Never fabricate a customer review, quote, or name. Not even a plausible one. For testimonial-style posts, either invite real customers to share their experience, or write the post around a clearly marked placeholder like [paste a real review here] for the owner to fill in.
 - Never promise outcomes the business cannot control.
-- Write in the requested language and spelling convention.
 - Plain text captions only. No markdown, no headings, no bullet characters.
 - Emojis: at most one or two, and only where the tone genuinely calls for it.
+
+Language:
+- Write every post entirely in the requested language, as a native speaker of it would write for a local audience. Use that language's own idiom, rhythm and punctuation conventions. A post must never read like English that has been translated.
+- Match the regional variety asked for, including its spelling (Australian English writes "organise" and "centre", not "organize" and "center").
+- Leave the business name, product names, website and any brand terms exactly as given. Do not translate or transliterate them.
+- Write hashtags in the same language as the post. Lowercase them only where that language's script has upper and lower case.
+- For right-to-left languages, write normally. Do not insert direction marks or reorder anything yourself.
 
 Return strict JSON only.`;
 
@@ -47,7 +54,9 @@ export function buildUserPrompt(input: GeneratePostsInput): string {
   if (business.productsServices) lines.push(`Products/services: ${business.productsServices}`);
   if (business.mainOffers) lines.push(`Current offers: ${business.mainOffers}`);
   lines.push(`Tone: ${business.brandTone.replace(/_/g, ' ')}`);
-  lines.push(`Language: ${business.language}`);
+  // The human-readable name beats the raw code — "Vietnamese (Tiếng Việt)"
+  // is unambiguous in a way that "vi" is not.
+  lines.push(`Language: write every post in ${describeLanguage(business.language)}.`);
 
   if (brand.brandVoice || brand.preferredCta || brand.wordsToAvoid.length) {
     lines.push('');
@@ -80,7 +89,7 @@ For each post return:
 - "category": exactly the category string given for that post
 - "caption": 30-80 words, plain text
 - "cta": one short call to action (under 12 words), or null
-- "hashtags": 3 to 6 relevant hashtags, no "#" prefix, lowercase
+- "hashtags": 3 to 6 relevant hashtags in the post's language, no "#" prefix
 - "imageIdea": one sentence describing a photo this business could realistically take
 - "imagePrompt": a detailed prompt for an AI image generator to produce that image
 

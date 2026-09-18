@@ -15,6 +15,7 @@ import {
   contentPreferencesSchema,
   generatePostsSchema,
 } from '@/lib/validations/content';
+import { businessOnboardingSchema } from '@/lib/validations/onboarding';
 import type { ContentCategory, PostStatus } from '@/types/database.types';
 
 export type ContentActionResult = { error: string } | { success: true; message?: string };
@@ -80,6 +81,66 @@ export async function saveContentPreferencesAction(
   revalidatePath('/settings');
   revalidatePath('/content');
   return { success: true, message: 'Content settings saved.' };
+}
+
+export async function saveBusinessSettingsAction(
+  _prevState: ContentActionResult | null,
+  formData: FormData
+): Promise<ContentActionResult> {
+  const supabase = createClient();
+  const businessId = await getOwnedBusinessId(supabase);
+  if (!businessId) return { error: 'Your session expired. Please log in again.' };
+
+  // Same shape as onboarding — one schema, one set of rules.
+  const parsed = businessOnboardingSchema.safeParse({
+    name: formData.get('name'),
+    category: formData.get('category'),
+    description: formData.get('description'),
+    website: formData.get('website'),
+    phone: formData.get('phone'),
+    contactEmail: formData.get('contactEmail'),
+    location: formData.get('location'),
+    targetCustomers: formData.get('targetCustomers'),
+    productsServices: formData.get('productsServices'),
+    mainOffers: formData.get('mainOffers'),
+    brandTone: formData.get('brandTone'),
+    preferredLanguage: formData.get('preferredLanguage'),
+    timezone: formData.get('timezone'),
+  });
+
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? 'Please check the form for errors.' };
+  }
+
+  const { error } = await supabase
+    .from('businesses')
+    .update({
+      name: parsed.data.name,
+      category: parsed.data.category,
+      description: parsed.data.description || null,
+      website: parsed.data.website || null,
+      phone: parsed.data.phone || null,
+      contact_email: parsed.data.contactEmail || null,
+      location: parsed.data.location || null,
+      target_customers: parsed.data.targetCustomers || null,
+      products_services: parsed.data.productsServices || null,
+      main_offers: parsed.data.mainOffers || null,
+      brand_tone: parsed.data.brandTone,
+      preferred_language: parsed.data.preferredLanguage,
+      timezone: parsed.data.timezone,
+    })
+    .eq('id', businessId);
+
+  if (error) return { error: 'Could not save your business details. Please try again.' };
+
+  revalidatePath('/settings');
+  revalidatePath('/calendar');
+  revalidatePath('/dashboard');
+  return {
+    success: true,
+    // Changing language doesn't rewrite what's already been generated.
+    message: 'Business details saved. New posts will use these settings.',
+  };
 }
 
 export async function saveBrandProfileAction(
