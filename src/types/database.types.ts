@@ -214,6 +214,7 @@ export interface Database {
           error_message: string | null;
           retry_count: number;
           publish_lock_token: string | null;
+          next_attempt_at: string | null;
           ai_model: string | null;
           created_at: string;
           updated_at: string;
@@ -232,7 +233,18 @@ export interface Database {
           scheduled_at?: string | null;
           ai_model?: string | null;
         };
-        Update: Partial<Database['public']['Tables']['posts']['Insert']>;
+        // Wider than Insert: the publisher writes lifecycle columns that
+        // nothing sets at creation time.
+        Update: Partial<
+          Database['public']['Tables']['posts']['Insert'] & {
+            published_at: string | null;
+            facebook_post_id: string | null;
+            error_message: string | null;
+            retry_count: number;
+            publish_lock_token: string | null;
+            next_attempt_at: string | null;
+          }
+        >;
         Relationships: [];
       };
       post_publish_attempts: {
@@ -424,6 +436,13 @@ export interface Database {
           p_failed?: number;
         };
         Returns: undefined;
+      };
+      claim_due_posts: {
+        Args: {
+          p_lock_token: string;
+          p_limit?: number;
+        };
+        Returns: Database['public']['Tables']['posts']['Row'][];
       };
     };
     Enums: {

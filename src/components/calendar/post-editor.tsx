@@ -2,12 +2,23 @@
 
 import { useState, useTransition } from 'react';
 import { useFormState } from 'react-dom';
-import { CalendarClock, Check, Copy, ExternalLink, Pencil, RefreshCw, Trash2, Undo2 } from 'lucide-react';
+import {
+  CalendarClock,
+  Check,
+  Copy,
+  ExternalLink,
+  Pencil,
+  RefreshCw,
+  RotateCcw,
+  Trash2,
+  Undo2,
+} from 'lucide-react';
 import {
   approvePostAction,
   duplicatePostAction,
   regeneratePostAction,
   reschedulePostAction,
+  retryPostAction,
   unapprovePostAction,
   updatePostAction,
   type PostActionResult,
@@ -58,6 +69,7 @@ export function PostEditor({ post, timezone }: { post: CalendarPost; timezone: s
 
   const isPublished = post.status === 'published';
   const isScheduled = post.status === 'scheduled';
+  const isFailed = post.status === 'failed';
 
   function run(action: () => Promise<PostActionResult>, onDone?: () => void) {
     setError(null);
@@ -106,6 +118,18 @@ export function PostEditor({ post, timezone }: { post: CalendarPost; timezone: s
           </div>
 
           <div className="flex items-center gap-1">
+            {isFailed && (
+              <button
+                type="button"
+                onClick={() => run(() => retryPostAction(post.id))}
+                disabled={isPending}
+                title="Try publishing again"
+                className="rounded-lg p-1.5 text-slate-400 hover:bg-emerald-50 hover:text-emerald-600 disabled:opacity-50"
+              >
+                <RotateCcw className="h-4 w-4" />
+              </button>
+            )}
+
             {!isPublished && (
               <>
                 {isScheduled ? (

@@ -203,6 +203,43 @@ export async function reschedulePostAction(
   return { success: true, message: 'Rescheduled.' };
 }
 
+/**
+ * Puts a failed post back in the publish queue. Without this a failed
+ * post is a dead end — the user could only delete it.
+ */
+export async function retryPostAction(postId: string): Promise<PostActionResult> {
+  const supabase = createClient();
+  const businessId = await getOwnedBusinessId(supabase);
+  if (!businessId) return { error: 'Your session expired. Please log in again.' };
+
+  const post = await loadOwnedPost(supabase, businessId, postId);
+  if (!post) return { error: 'Post not found.' };
+  if (post.status !== 'failed') return { error: 'Only failed posts can be retried.' };
+
+  const isPast = !post.scheduled_at || new Date(post.scheduled_at).getTime() <= Date.now();
+
+  const { error } = await supabase
+    .from('posts')
+    .update({
+      status: 'scheduled' as PostStatus,
+      error_message: null,
+      retry_count: 0,
+      next_attempt_at: null,
+      // A post whose slot has passed would otherwise publish instantly;
+      // give it a minute so the user can still change their mind.
+      scheduled_at: isPast
+        ? new Date(Date.now() + 60_000).toISOString()
+        : post.scheduled_at,
+    })
+    .eq('id', post.id)
+    .eq('business_id', businessId);
+
+  if (error) return { error: 'Could not queue that post again.' };
+
+  refreshViews();
+  return { success: true, message: isPast ? 'Queued to publish shortly.' : 'Back in the queue.' };
+}
+
 export async function duplicatePostAction(postId: string): Promise<PostActionResult> {
   const supabase = createClient();
   const businessId = await getOwnedBusinessId(supabase);

@@ -185,6 +185,40 @@ export async function debugToken(inputToken: string): Promise<TokenDebugInfo> {
   return result.data;
 }
 
+/**
+ * Publishes a text post to a Page's feed.
+ *
+ * Uses the Page access token, not the user token — publishing as the Page
+ * is what `pages_manage_posts` grants. Returns Meta's composite post id
+ * ("{page-id}_{post-id}").
+ */
+export async function publishToPage(
+  pageId: string,
+  pageAccessToken: string,
+  message: string
+): Promise<{ id: string }> {
+  const body = new URLSearchParams({ message, access_token: pageAccessToken });
+
+  const response = await fetch(`${GRAPH_BASE}/${pageId}/feed`, {
+    method: 'POST',
+    cache: 'no-store',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body,
+  });
+
+  const payload = (await response.json().catch(() => ({}))) as { id?: string } & GraphErrorBody;
+
+  if (!response.ok || payload.error || !payload.id) {
+    throw new MetaGraphError(
+      payload.error?.message ?? 'Facebook rejected the post.',
+      response.status,
+      payload.error
+    );
+  }
+
+  return { id: payload.id };
+}
+
 // Fully de-authorizes the app for this user — the correct counterpart to
 // "Disconnect Facebook", rather than just forgetting the token locally.
 export async function revokeUserPermissions(userAccessToken: string): Promise<void> {

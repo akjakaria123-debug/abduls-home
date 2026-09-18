@@ -26,11 +26,35 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
     redirect('/onboarding');
   }
 
+  const [{ data: notifications }, { count: unreadCount }] = await Promise.all([
+    supabase
+      .from('notifications')
+      .select('id, message, read, created_at')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(15),
+    supabase
+      .from('notifications')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+      .eq('read', false),
+  ]);
+
   return (
     <div className="flex min-h-screen bg-slate-50">
       <Sidebar />
       <div className="flex flex-1 flex-col">
-        <Topbar businessName={business.name} userEmail={user.email ?? ''} />
+        <Topbar
+          businessName={business.name}
+          userEmail={user.email ?? ''}
+          notifications={(notifications ?? []).map((notification) => ({
+            id: notification.id,
+            message: notification.message,
+            read: notification.read,
+            createdAt: notification.created_at,
+          }))}
+          unreadCount={unreadCount ?? 0}
+        />
         <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8">{children}</main>
       </div>
     </div>
