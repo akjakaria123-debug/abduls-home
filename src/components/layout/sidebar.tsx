@@ -10,6 +10,7 @@ import {
   BarChart3,
   CreditCard,
   Settings,
+  ShieldCheck,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -23,7 +24,7 @@ const NAV_ITEMS = [
   { href: '/settings', label: 'Settings', icon: Settings },
 ];
 
-export function Sidebar() {
+export function Sidebar({ isAdmin = false }: { isAdmin?: boolean }) {
   const pathname = usePathname();
 
   return (
@@ -51,6 +52,16 @@ export function Sidebar() {
             </Link>
           );
         })}
+
+        {isAdmin && (
+          <Link
+            href="/admin"
+            className="mt-4 flex items-center gap-3 rounded-lg border-t border-slate-100 px-3 pb-2 pt-4 text-sm font-medium text-slate-600 hover:text-slate-900"
+          >
+            <ShieldCheck className="h-4 w-4" />
+            Admin
+          </Link>
+        )}
       </nav>
     </aside>
   );

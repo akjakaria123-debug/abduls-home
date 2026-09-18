@@ -50,6 +50,7 @@ export interface Database {
           id: string;
           full_name: string | null;
           role: UserRole;
+          suspended_at: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -57,6 +58,7 @@ export interface Database {
           id: string;
           full_name?: string | null;
           role?: UserRole;
+          suspended_at?: string | null;
         };
         Update: Partial<Database['public']['Tables']['profiles']['Insert']>;
         Relationships: [];

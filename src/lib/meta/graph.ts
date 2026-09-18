@@ -219,6 +219,79 @@ export async function publishToPage(
   return { id: payload.id };
 }
 
+export interface PostInsights {
+  reach: number | null;
+  clicks: number | null;
+  reactions: number | null;
+  comments: number | null;
+  shares: number | null;
+}
+
+/**
+ * Reads what Meta will tell us about a published post.
+ *
+ * Two sources, because they genuinely are two: reach and clicks come from
+ * the insights edge, while reactions, comments and shares come from the
+ * post object's own summaries.
+ *
+ * Anything Meta doesn't return comes back as null, never 0 — a metric the
+ * API withheld and a metric that is genuinely zero must not look the same
+ * to the user. The two halves fail independently so one missing metric
+ * doesn't blank out the rest.
+ */
+export async function fetchPostInsights(
+  facebookPostId: string,
+  pageAccessToken: string
+): Promise<PostInsights> {
+  const insights: PostInsights = {
+    reach: null,
+    clicks: null,
+    reactions: null,
+    comments: null,
+    shares: null,
+  };
+
+  try {
+    const result = await graphGet<{
+      data?: { name: string; values?: { value?: number }[] }[];
+    }>(`/${facebookPostId}/insights`, {
+      metric: 'post_impressions_unique,post_clicks',
+      access_token: pageAccessToken,
+    });
+
+    for (const metric of result.data ?? []) {
+      const value = metric.values?.[0]?.value;
+      if (typeof value !== 'number') continue;
+      if (metric.name === 'post_impressions_unique') insights.reach = value;
+      if (metric.name === 'post_clicks') insights.clicks = value;
+    }
+  } catch {
+    // Insights can be unavailable for a Page below Meta's reporting
+    // threshold. Leave these null and still try the engagement counts.
+  }
+
+  try {
+    const result = await graphGet<{
+      reactions?: { summary?: { total_count?: number } };
+      comments?: { summary?: { total_count?: number } };
+      shares?: { count?: number };
+    }>(`/${facebookPostId}`, {
+      fields: 'reactions.summary(true),comments.summary(true),shares',
+      access_token: pageAccessToken,
+    });
+
+    insights.reactions = result.reactions?.summary?.total_count ?? 0;
+    insights.comments = result.comments?.summary?.total_count ?? 0;
+    // Meta omits `shares` entirely when a post has none, so a successful
+    // response with no shares field really does mean zero.
+    insights.shares = result.shares?.count ?? 0;
+  } catch {
+    // Leave the engagement counts null.
+  }
+
+  return insights;
+}
+
 // Fully de-authorizes the app for this user — the correct counterpart to
 // "Disconnect Facebook", rather than just forgetting the token locally.
 export async function revokeUserPermissions(userAccessToken: string): Promise<void> {

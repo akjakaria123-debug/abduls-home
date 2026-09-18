@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 
 const PROTECTED_PREFIXES = [
+  '/admin',
   '/dashboard',
   '/content',
   '/calendar',
@@ -59,8 +60,11 @@ export async function middleware(request: NextRequest) {
   }
 
   // Route users without a business into onboarding, and users who already
-  // have one away from onboarding.
-  if (user && (isProtected || path === '/onboarding')) {
+  // have one away from onboarding. The admin area is exempt: an admin is
+  // not necessarily a customer and may have no business of their own.
+  const isAdminArea = path === '/admin' || path.startsWith('/admin/');
+
+  if (user && !isAdminArea && (isProtected || path === '/onboarding')) {
     const { count } = await supabase
       .from('businesses')
       .select('id', { count: 'exact', head: true })
