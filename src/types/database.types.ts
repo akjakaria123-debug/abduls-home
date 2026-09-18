@@ -415,7 +415,17 @@ export interface Database {
       };
     };
     Views: Record<string, never>;
-    Functions: Record<string, never>;
+    Functions: {
+      increment_usage: {
+        Args: {
+          p_business_id: string;
+          p_generated?: number;
+          p_published?: number;
+          p_failed?: number;
+        };
+        Returns: undefined;
+      };
+    };
     Enums: {
       brand_tone: BrandTone;
       content_category: ContentCategory;
