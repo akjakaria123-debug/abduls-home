@@ -20,3 +20,24 @@ npm run dev
 ```
 
 Open http://localhost:3000.
+
+## Cron schedules and your Vercel plan
+
+`vercel.json` is currently set for **Vercel's free Hobby plan**, which only
+allows one cron run per day. That is enough to prove the pipeline works, but
+scheduled posts will publish up to 24 hours late.
+
+**Before taking real customers, upgrade to Vercel Pro and change
+`vercel.json` to:**
+
+```json
+{
+  "crons": [
+    { "path": "/api/cron/publish", "schedule": "*/5 * * * *" },
+    { "path": "/api/cron/refresh-insights", "schedule": "0 * * * *" }
+  ]
+}
+```
+
+That publishes posts within 5 minutes of their scheduled time, which is what
+customers are paying for.
