@@ -70,13 +70,36 @@ const FAQ = [
   },
 ];
 
+interface LandingPlan {
+  key: string;
+  name: string;
+  price_aud: number;
+  max_pages: number;
+  max_posts_per_day: number;
+  features: Json;
+}
+
+/**
+ * The marketing page is the one page that must never go down. Pricing
+ * comes from the database, but a database that is unreachable — or not
+ * configured yet — should cost us the pricing table, not the whole page.
+ */
+async function loadPlans(): Promise<LandingPlan[]> {
+  try {
+    const { data } = await createClient()
+      .from('plans')
+      .select('key, name, price_aud, max_pages, max_posts_per_day, features')
+      .eq('is_active', true)
+      .order('sort_order', { ascending: true });
+
+    return data ?? [];
+  } catch {
+    return [];
+  }
+}
+
 export default async function LandingPage() {
-  const supabase = createClient();
-  const { data: plans } = await supabase
-    .from('plans')
-    .select('key, name, price_aud, max_pages, max_posts_per_day, features')
-    .eq('is_active', true)
-    .order('sort_order', { ascending: true });
+  const plans = await loadPlans();
 
   return (
     <div className="bg-white">
@@ -172,7 +195,7 @@ export default async function LandingPage() {
             All plans start with a 7-day free trial. Prices in AUD.
           </p>
           <div className="mt-10 grid gap-6 sm:grid-cols-3">
-            {(plans ?? []).map((plan) => {
+            {plans.map((plan) => {
               const features = Array.isArray(plan.features) ? (plan.features as Json[]) : [];
               return (
                 <div key={plan.key} className="rounded-2xl border border-slate-200 p-6">
@@ -199,7 +222,7 @@ export default async function LandingPage() {
               );
             })}
           </div>
-          {!plans?.length && (
+          {plans.length === 0 && (
             <p className="mt-6 text-center text-sm text-slate-400">
               Pricing plans will appear here once the database migrations have been run.
             </p>
