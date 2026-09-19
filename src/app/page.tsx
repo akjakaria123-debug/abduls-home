@@ -241,7 +241,18 @@ export default async function LandingPage() {
       </section>
 
       <footer className="border-t border-slate-100 py-8 text-center text-sm text-slate-400">
-        © {new Date().getFullYear()} PostPilot.ai · Built for Australian small businesses
+        <nav className="mb-3 flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
+          <Link href="/privacy" className="hover:text-slate-600 hover:underline">
+            Privacy Policy
+          </Link>
+          <Link href="/terms" className="hover:text-slate-600 hover:underline">
+            Terms of Service
+          </Link>
+          <Link href="/data-deletion" className="hover:text-slate-600 hover:underline">
+            Data Deletion
+          </Link>
+        </nav>
+        <p>© {new Date().getFullYear()} PostPilot.ai · Built for Australian small businesses</p>
       </footer>
     </div>
   );

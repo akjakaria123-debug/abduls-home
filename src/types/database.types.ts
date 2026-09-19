@@ -407,6 +407,30 @@ export interface Database {
         Update: Partial<Database['public']['Tables']['api_logs']['Insert']>;
         Relationships: [];
       };
+      data_deletion_requests: {
+        Row: {
+          id: string;
+          confirmation_code: string;
+          meta_user_id: string | null;
+          source: string;
+          status: string;
+          connections_removed: number;
+          pages_removed: number;
+          requested_at: string;
+          completed_at: string | null;
+        };
+        Insert: {
+          confirmation_code: string;
+          meta_user_id?: string | null;
+          source?: string;
+          status?: string;
+          connections_removed?: number;
+          pages_removed?: number;
+          completed_at?: string | null;
+        };
+        Update: Partial<Database['public']['Tables']['data_deletion_requests']['Insert']>;
+        Relationships: [];
+      };
       admin_logs: {
         Row: {
           id: string;
