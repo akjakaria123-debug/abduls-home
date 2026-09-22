@@ -9,7 +9,17 @@ import {
 import { SYSTEM_PROMPT, buildUserPrompt } from '@/lib/ai/prompt';
 import type { ContentCategory } from '@/types/database.types';
 
-const OPENAI_URL = 'https://api.openai.com/v1/chat/completions';
+// One implementation for every vendor that speaks OpenAI's
+// /chat/completions dialect — OpenAI itself, and Google's Gemini through
+// its OpenAI-compatibility endpoint. Swapping vendors is a base URL, a
+// key and a model name, which is what makes a free tier a config change
+// rather than a rewrite.
+export interface ChatCompletionsConfig {
+  /** Origin plus version prefix, no trailing slash, e.g. https://api.openai.com/v1 */
+  baseUrl: string;
+  apiKey: string;
+  model: string;
+}
 
 // The model returns free-form JSON; nothing downstream trusts it until
 // it has been through this.
@@ -28,22 +38,32 @@ function normaliseHashtag(tag: string): string {
   return tag.replace(/^#/, '').replace(/\s+/g, '').toLowerCase();
 }
 
-export class OpenAIProvider implements AIProvider {
+// Models outside OpenAI's own line often return the JSON wrapped in a
+// markdown fence despite being asked for raw JSON. Unwrap it rather than
+// failing the whole generation over punctuation.
+function stripCodeFence(content: string): string {
+  const trimmed = content.trim();
+  if (!trimmed.startsWith('```')) return trimmed;
+
+  return trimmed
+    .replace(/^```(?:json)?\s*/i, '')
+    .replace(/```$/, '')
+    .trim();
+}
+
+export class ChatCompletionsProvider implements AIProvider {
   readonly model: string;
+  private readonly baseUrl: string;
   private readonly apiKey: string;
 
-  constructor() {
-    const apiKey = process.env.OPENAI_API_KEY;
-    if (!apiKey) {
-      throw new AIProviderError('OPENAI_API_KEY is not set.');
-    }
-
-    this.apiKey = apiKey;
-    this.model = process.env.OPENAI_MODEL ?? 'gpt-4o-mini';
+  constructor(config: ChatCompletionsConfig) {
+    this.baseUrl = config.baseUrl.replace(/\/+$/, '');
+    this.apiKey = config.apiKey;
+    this.model = config.model;
   }
 
   async generatePosts(input: GeneratePostsInput): Promise<GeneratedPostDraft[]> {
-    const response = await fetch(OPENAI_URL, {
+    const response = await fetch(`${this.baseUrl}/chat/completions`, {
       method: 'POST',
       cache: 'no-store',
       headers: {
@@ -77,7 +97,7 @@ export class OpenAIProvider implements AIProvider {
 
     let parsed: unknown;
     try {
-      parsed = JSON.parse(content);
+      parsed = JSON.parse(stripCodeFence(content));
     } catch {
       throw new AIProviderError('The AI provider returned malformed JSON.');
     }
