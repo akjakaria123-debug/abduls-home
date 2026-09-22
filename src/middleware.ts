@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
+import { supabaseAnonKey, supabaseUrl } from '@/lib/supabase/env';
 
 const PROTECTED_PREFIXES = [
   '/admin',
@@ -17,19 +18,18 @@ const AUTH_PAGES = ['/login', '/signup'];
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({ request: { headers: request.headers } });
 
-  // Pasted values routinely arrive with stray whitespace or newlines.
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim();
+  const url = supabaseUrl();
+  const anonKey = supabaseAnonKey();
 
   // Middleware runs on every route, so throwing here takes the entire site
   // down — including the landing page, which needs no database at all.
   // If it isn't configured, step aside. Pages that genuinely need a session
   // check it again themselves, so nothing is left unguarded.
-  if (!supabaseUrl || !supabaseAnonKey) {
+  if (!url || !anonKey) {
     return response;
   }
 
-  const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
+  const supabase = createServerClient(url, anonKey, {
       cookies: {
         get(name: string) {
           return request.cookies.get(name)?.value;

@@ -20,6 +20,4 @@ export function getStripe(): Stripe {
   return cached;
 }
 
-export function siteUrl(): string {
-  return process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
-}
+export { siteUrl } from '@/lib/site-url';

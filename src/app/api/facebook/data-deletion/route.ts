@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { createHmac, randomBytes, timingSafeEqual } from 'crypto';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { logApiCall } from '@/lib/api-logs';
+import { siteUrl } from '@/lib/site-url';
 
 export const dynamic = 'force-dynamic';
 
@@ -46,7 +47,7 @@ function parseSignedRequest(signedRequest: string, appSecret: string): SignedReq
 
 export async function POST(request: Request) {
   const appSecret = process.env.META_APP_SECRET;
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? '';
+  const origin = siteUrl();
 
   if (!appSecret) {
     return NextResponse.json({ error: 'Not configured.' }, { status: 500 });
@@ -130,7 +131,7 @@ export async function POST(request: Request) {
 
   // The exact shape Meta expects back.
   return NextResponse.json({
-    url: `${siteUrl}/data-deletion?code=${confirmationCode}`,
+    url: `${origin}/data-deletion?code=${confirmationCode}`,
     confirmation_code: confirmationCode,
   });
 }

@@ -3,13 +3,10 @@
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
+import { siteUrl } from '@/lib/site-url';
 import { signUpSchema, loginSchema, forgotPasswordSchema, resetPasswordSchema } from '@/lib/validations/auth';
 
 export type ActionResult = { error: string } | { success: true };
-
-function siteUrl() {
-  return process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
-}
 
 export async function signUpAction(
   _prevState: ActionResult | null,
