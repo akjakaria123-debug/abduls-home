@@ -62,7 +62,7 @@ export class ChatCompletionsProvider implements AIProvider {
     this.model = config.model;
   }
 
-  private async post(messages: unknown, useJsonMode: boolean) {
+  private async send(messages: unknown, useJsonMode: boolean) {
     const response = await fetch(`${this.baseUrl}/chat/completions`, {
       method: 'POST',
       cache: 'no-store',
@@ -91,6 +91,33 @@ export class ChatCompletionsProvider implements AIProvider {
     }
 
     return { ok: response.ok, status: response.status, body: parsed, text };
+  }
+
+  /**
+   * Sends the request, retrying the failures that are about the vendor's
+   * moment rather than our request.
+   *
+   * A free tier answers 503 "experiencing high demand" often enough that
+   * giving up on the first one would make the product look broken when
+   * nothing is wrong. Rate limits and gateway errors are the same kind
+   * of no. A 400 or a 401 is about what we sent and will fail again, so
+   * those return immediately.
+   *
+   * Two short waits, bounded well inside a serverless function's budget.
+   */
+  private async post(messages: unknown, useJsonMode: boolean) {
+    const RETRY_STATUSES = new Set([429, 500, 502, 503, 504]);
+    const BACKOFF_MS = [800, 2000];
+
+    let attempt = await this.send(messages, useJsonMode);
+
+    for (const wait of BACKOFF_MS) {
+      if (attempt.ok || !RETRY_STATUSES.has(attempt.status)) break;
+      await new Promise((resolve) => setTimeout(resolve, wait));
+      attempt = await this.send(messages, useJsonMode);
+    }
+
+    return attempt;
   }
 
   async generatePosts(input: GeneratePostsInput): Promise<GeneratedPostDraft[]> {
