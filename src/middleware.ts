@@ -4,6 +4,7 @@ import { supabaseAnonKey, supabaseUrl } from '@/lib/supabase/env';
 
 const PROTECTED_PREFIXES = [
   '/admin',
+  '/assistant',
   '/dashboard',
   '/content',
   '/calendar',
