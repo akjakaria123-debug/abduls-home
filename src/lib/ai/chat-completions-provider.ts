@@ -99,17 +99,17 @@ export class ChatCompletionsProvider implements AIProvider {
       { role: 'user', content: buildUserPrompt(input) },
     ];
 
-    let result = await this.post(messages, true);
+    let attempt = await this.post(messages, true);
 
     // JSON mode is an optimisation, not a requirement: the prompt already
     // specifies the exact shape and the reply is validated either way.
     // Vendors that do not accept response_format reject the whole request
     // over it, so drop it and ask again rather than failing outright.
-    if (!result.ok && result.status === 400 && /response_format/i.test(result.text)) {
-      result = await this.post(messages, false);
+    if (!attempt.ok && attempt.status === 400 && /response_format/i.test(attempt.text)) {
+      attempt = await this.post(messages, false);
     }
 
-    const { ok, status, body, text } = result;
+    const { ok, status, body, text } = attempt;
 
     if (!ok) {
       const reported = body?.error?.message ?? body?.message;
