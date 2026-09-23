@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import { Plus_Jakarta_Sans } from 'next/font/google';
 import type { ReactNode } from 'react';
 import './globals.css';
 
-const inter = Inter({ subsets: ['latin'] });
+const jakarta = Plus_Jakarta_Sans({ subsets: ['latin'], display: 'swap' });
 
 export const metadata: Metadata = {
   title: 'PostPilot.ai — Automatic Facebook Posting for Small Business',
@@ -13,7 +13,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      {/* No <head> element here: rendering one in a root layout stops
+          Next injecting its own stylesheet links, which silently ships
+          the whole site unstyled. */}
+      <body className={jakarta.className}>{children}</body>
     </html>
   );
 }
