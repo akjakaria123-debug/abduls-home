@@ -70,15 +70,37 @@ async function graphGet<T>(path: string, params: Record<string, string>): Promis
   return body;
 }
 
+/**
+ * Builds the consent dialog URL.
+ *
+ * Which parameter carries the permissions depends on the login product
+ * the Meta app uses:
+ *
+ * - Plain "Facebook Login" takes `scope` — the list below.
+ * - "Facebook Login for Business" ignores `scope` entirely and takes
+ *   `config_id`, pointing at a configuration created on the app that
+ *   names the permissions. Send `scope` to it and the user signs in
+ *   perfectly happily having granted nothing, and the failure only
+ *   appears later as a Graph error about a missing field.
+ *
+ * So when META_LOGIN_CONFIG_ID is set we send that and nothing else;
+ * otherwise we send the scopes.
+ */
 export function buildFacebookOAuthUrl(redirectUri: string, state: string): string {
   const { appId } = getAppCredentials();
+  const configId = process.env.META_LOGIN_CONFIG_ID?.trim();
 
   const url = new URL(`https://www.facebook.com/${GRAPH_VERSION}/dialog/oauth`);
   url.searchParams.set('client_id', appId);
   url.searchParams.set('redirect_uri', redirectUri);
   url.searchParams.set('state', state);
-  url.searchParams.set('scope', FACEBOOK_OAUTH_SCOPES.join(','));
   url.searchParams.set('response_type', 'code');
+
+  if (configId) {
+    url.searchParams.set('config_id', configId);
+  } else {
+    url.searchParams.set('scope', FACEBOOK_OAUTH_SCOPES.join(','));
+  }
 
   return url.toString();
 }
