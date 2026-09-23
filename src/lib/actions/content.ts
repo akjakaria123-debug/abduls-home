@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { logApiCall } from '@/lib/api-logs';
 import { getAIProvider } from '@/lib/ai';
-import { AIProviderError } from '@/lib/ai/provider';
+import { AIProviderError, type GeneratedPostDraft } from '@/lib/ai/provider';
 import { buildCategoryMix } from '@/lib/ai/category-mix';
 import { loadGenerationContext, loadRecentPosts } from '@/lib/ai/context';
 import { buildScheduleSlots } from '@/lib/scheduling/slots';
@@ -19,6 +19,10 @@ import { businessOnboardingSchema } from '@/lib/validations/onboarding';
 import type { ContentCategory, PostStatus } from '@/types/database.types';
 
 export type ContentActionResult = { error: string } | { success: true; message?: string };
+
+export type PreviewResult =
+  | { error: string }
+  | { success: true; draft: GeneratedPostDraft };
 
 async function getOwnedBusinessId(supabase: ReturnType<typeof createClient>) {
   const {
@@ -360,4 +364,66 @@ export async function deletePostAction(postId: string): Promise<ContentActionRes
   revalidatePath('/content');
   revalidatePath('/dashboard');
   return { success: true };
+}
+
+
+/**
+ * Writes one sample post and returns it without saving anything.
+ *
+ * Generating a real run needs a connected Page, because each post is
+ * scheduled against one. Connecting a Page is also the longest part of
+ * setup — a Meta app, its permissions, app review. Making the owner
+ * finish all of that before seeing whether the AI understands their
+ * business at all is the wrong order: this is the part they are buying,
+ * and it depends on nothing but the details they have already entered.
+ *
+ * Touches no table, so it cannot collide with scheduling or publishing.
+ */
+export async function previewPostAction(): Promise<PreviewResult> {
+  const supabase = createClient();
+  const businessId = await getOwnedBusinessId(supabase);
+  if (!businessId) return { error: 'Sign in and finish setting up your business first.' };
+
+  const context = await loadGenerationContext(supabase, businessId);
+  if (!context) return { error: 'Finish setting up your business before generating content.' };
+
+  const enabled = context.preferences?.enabledCategories ?? [];
+  const category: ContentCategory = enabled[Math.floor(Math.random() * enabled.length)] ?? 'tips';
+
+  try {
+    const drafts = await getAIProvider().generatePosts({
+      business: context.business,
+      brand: context.brand,
+      categories: [category],
+      recentCaptions: [],
+    });
+
+    await logApiCall({
+      businessId,
+      service: 'openai',
+      endpoint: '/chat/completions',
+      success: true,
+    });
+
+    const draft = drafts[0];
+    if (!draft) return { error: 'The AI returned no usable post. Please try again.' };
+
+    return { success: true, draft };
+  } catch (error) {
+    const message =
+      error instanceof AIProviderError
+        ? error.message
+        : 'Could not reach the AI provider. Please try again.';
+
+    await logApiCall({
+      businessId,
+      service: 'openai',
+      endpoint: '/chat/completions',
+      success: false,
+      statusCode: error instanceof AIProviderError ? error.status ?? null : null,
+      errorMessage: message,
+    });
+
+    return { error: message };
+  }
 }

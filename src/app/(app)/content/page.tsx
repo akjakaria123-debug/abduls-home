@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { GeneratePanel } from '@/components/content/generate-panel';
 import { PostCard } from '@/components/content/post-card';
+import { PreviewPost } from '@/components/content/preview-post';
 
 export default async function ContentPage() {
   const supabase = createClient();
@@ -61,6 +62,12 @@ export default async function ContentPage() {
             <Link href="/facebook-pages">
               <Button>Go to Facebook Pages</Button>
             </Link>
+            <div className="mx-auto max-w-lg border-t border-slate-100 pt-6">
+              <p className="mb-3 text-sm text-slate-500">
+                Not connected yet? See what the AI would write for your business.
+              </p>
+              <PreviewPost />
+            </div>
           </CardContent>
         </Card>
       ) : !hasCategories ? (
