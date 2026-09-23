@@ -18,7 +18,11 @@ const VENDORS = {
     // Google's OpenAI-compatibility endpoint.
     baseUrl: 'https://generativelanguage.googleapis.com/v1beta/openai',
     keyVar: 'GEMINI_API_KEY',
-    defaultModel: 'gemini-2.5-flash',
+    // Google retires model names and refuses the old one outright for
+    // accounts that never used it, so this goes stale on its own
+    // schedule. The refusal names the replacement; AI_MODEL overrides
+    // this without a deploy when it happens again.
+    defaultModel: 'gemini-3.6-flash',
   },
 } as const;
 
