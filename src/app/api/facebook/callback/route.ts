@@ -8,7 +8,8 @@ import {
   exchangeForLongLivedUserToken,
   fetchMetaUserId,
   fetchUserPages,
-  FACEBOOK_OAUTH_SCOPES,
+  assertPageScopesGranted,
+  MissingPermissionsError,
   MetaGraphError,
 } from '@/lib/meta/graph';
 import { OAUTH_STATE_COOKIE, facebookRedirectUri } from '@/lib/meta/oauth';
@@ -55,6 +56,10 @@ export async function GET(request: Request) {
   try {
     const shortLived = await exchangeCodeForUserToken(code, facebookRedirectUri());
     const longLived = await exchangeForLongLivedUserToken(shortLived.access_token);
+    // Check what was actually granted before using it, so a declined or
+    // skipped permission is reported as such rather than surfacing later
+    // as an unrelated-looking Graph API error.
+    const grantedScopes = await assertPageScopesGranted(longLived.access_token);
     const metaUserId = await fetchMetaUserId(longLived.access_token);
     const pages = await fetchUserPages(longLived.access_token);
 
@@ -80,7 +85,7 @@ export async function GET(request: Request) {
         meta_user_id: metaUserId,
         long_lived_user_token_encrypted: encryptToken(longLived.access_token),
         token_expires_at: tokenExpiresAt,
-        scopes: [...FACEBOOK_OAUTH_SCOPES],
+        scopes: grantedScopes,
         status: 'active',
       })
       .select('id')
@@ -125,7 +130,9 @@ export async function GET(request: Request) {
     return back('connected=1');
   } catch (error) {
     const message =
-      error instanceof MetaGraphError ? error.message : 'Something went wrong connecting Facebook.';
+      error instanceof MissingPermissionsError || error instanceof MetaGraphError
+        ? error.message
+        : 'Something went wrong connecting Facebook.';
 
     await logApiCall({
       businessId: business.id,

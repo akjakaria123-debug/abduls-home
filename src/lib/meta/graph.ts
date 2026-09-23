@@ -231,6 +231,49 @@ export async function debugToken(inputToken: string): Promise<TokenDebugInfo> {
   return result.data;
 }
 
+// Permissions without which nothing downstream can work: listing the
+// Pages, and publishing to the chosen one.
+export const REQUIRED_SCOPES = ['pages_show_list', 'pages_manage_posts'] as const;
+
+export class MissingPermissionsError extends Error {
+  readonly missing: string[];
+  readonly granted: string[];
+
+  constructor(missing: string[], granted: string[]) {
+    super(
+      `Facebook did not grant ${missing.join(' and ')}. ` +
+        (granted.length
+          ? `It granted only: ${granted.join(', ')}.`
+          : 'It granted no Page permissions at all.')
+    );
+    this.name = 'MissingPermissionsError';
+    this.missing = missing;
+    this.granted = granted;
+  }
+}
+
+/**
+ * Confirms the token actually carries the permissions we asked for.
+ *
+ * Asking for a scope and receiving it are different things: a consent
+ * screen can be dismissed per-permission, and a login product that wants
+ * a configuration instead of a `scope` parameter will hand back a valid
+ * token that grants nothing. Without this check the first symptom is
+ * Meta answering a later call with "(#100) Tried accessing nonexisting
+ * field (access_token)", which says nothing about the real cause.
+ */
+export async function assertPageScopesGranted(userAccessToken: string): Promise<string[]> {
+  const info = await debugToken(userAccessToken);
+  const granted = info.scopes ?? [];
+  const missing = REQUIRED_SCOPES.filter((scope) => !granted.includes(scope));
+
+  if (missing.length > 0) {
+    throw new MissingPermissionsError(missing, granted);
+  }
+
+  return granted;
+}
+
 /**
  * Publishes a text post to a Page's feed.
  *
