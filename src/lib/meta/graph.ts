@@ -3,7 +3,29 @@ import 'server-only';
 // Meta deprecates Graph API versions roughly two years after release —
 // check developers.facebook.com/docs/graph-api/changelog and bump
 // META_GRAPH_API_VERSION when the pinned one nears end of life.
-const GRAPH_VERSION = process.env.META_GRAPH_API_VERSION ?? 'v21.0';
+const DEFAULT_GRAPH_VERSION = 'v21.0';
+
+/**
+ * The version segment of every Graph URL.
+ *
+ * `??` was not enough here. An environment variable that exists but is
+ * blank — which is all it takes to add the key in a hosting dashboard
+ * and tab past the value — is a string, not undefined, so the default
+ * never applied and every URL lost its version:
+ * `https://graph.facebook.com//oauth/access_token`. Graph then reads
+ * `oauth` as a node and `access_token` as a field on it, and answers
+ * "(#100) Tried accessing nonexisting field (access_token)" — which
+ * names neither the version nor the real problem.
+ */
+function graphVersion(): string {
+  const configured = process.env.META_GRAPH_API_VERSION?.trim().replace(/^\/+|\/+$/g, '');
+  if (!configured) return DEFAULT_GRAPH_VERSION;
+
+  // "21.0" is the same intent as "v21.0"; accept both.
+  return /^v/i.test(configured) ? configured : `v${configured}`;
+}
+
+const GRAPH_VERSION = graphVersion();
 const GRAPH_BASE = `https://graph.facebook.com/${GRAPH_VERSION}`;
 
 // The minimum set needed to list Pages, publish to them, and read the
