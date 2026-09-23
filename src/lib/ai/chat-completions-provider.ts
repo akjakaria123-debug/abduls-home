@@ -62,7 +62,7 @@ export class ChatCompletionsProvider implements AIProvider {
     this.model = config.model;
   }
 
-  async generatePosts(input: GeneratePostsInput): Promise<GeneratedPostDraft[]> {
+  private async post(messages: unknown, useJsonMode: boolean) {
     const response = await fetch(`${this.baseUrl}/chat/completions`, {
       method: 'POST',
       cache: 'no-store',
@@ -73,20 +73,51 @@ export class ChatCompletionsProvider implements AIProvider {
       body: JSON.stringify({
         model: this.model,
         temperature: 0.9,
-        response_format: { type: 'json_object' },
-        messages: [
-          { role: 'system', content: SYSTEM_PROMPT },
-          { role: 'user', content: buildUserPrompt(input) },
-        ],
+        ...(useJsonMode ? { response_format: { type: 'json_object' } } : {}),
+        messages,
       }),
     });
 
-    const body = await response.json().catch(() => null);
+    // Not every vendor answers an error with JSON, and one that does may
+    // not use OpenAI's envelope. Keep the raw text so the message we
+    // raise names the actual complaint rather than the fact that one
+    // occurred.
+    const text = await response.text();
+    let parsed: any = null;
+    try {
+      parsed = JSON.parse(text);
+    } catch {
+      /* left as null; `text` still carries the answer */
+    }
 
-    if (!response.ok) {
+    return { ok: response.ok, status: response.status, body: parsed, text };
+  }
+
+  async generatePosts(input: GeneratePostsInput): Promise<GeneratedPostDraft[]> {
+    const messages = [
+      { role: 'system', content: SYSTEM_PROMPT },
+      { role: 'user', content: buildUserPrompt(input) },
+    ];
+
+    let result = await this.post(messages, true);
+
+    // JSON mode is an optimisation, not a requirement: the prompt already
+    // specifies the exact shape and the reply is validated either way.
+    // Vendors that do not accept response_format reject the whole request
+    // over it, so drop it and ask again rather than failing outright.
+    if (!result.ok && result.status === 400 && /response_format/i.test(result.text)) {
+      result = await this.post(messages, false);
+    }
+
+    const { ok, status, body, text } = result;
+
+    if (!ok) {
+      const reported = body?.error?.message ?? body?.message;
       throw new AIProviderError(
-        body?.error?.message ?? 'The AI provider rejected the request.',
-        response.status
+        reported
+          ? `${reported} (HTTP ${status}, model ${this.model})`
+          : `The AI provider rejected the request: HTTP ${status}, model ${this.model}. ${text.slice(0, 300)}`,
+        status
       );
     }
 
