@@ -26,15 +26,15 @@ export function WeekView({
           <div
             key={day.key}
             className={cn(
-              'rounded-xl border bg-white p-2',
-              isToday ? 'border-brand-300' : 'border-slate-200'
+              'rounded-xl border bg-white/[0.04] p-2',
+              isToday ? 'border-brand-300' : 'border-white/10'
             )}
           >
             <Link
               href={`/calendar?view=day&date=${day.key}`}
               className={cn(
                 'mb-2 block text-xs font-medium hover:underline',
-                isToday ? 'text-brand-700' : 'text-slate-500'
+                isToday ? 'text-indigo-200' : 'text-slate-400'
               )}
             >
               {formatDayHeading(day.key)}

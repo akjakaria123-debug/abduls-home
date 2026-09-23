@@ -6,7 +6,7 @@ export function DayView({ posts, timezone }: { posts: CalendarPost[]; timezone: 
   if (!posts.length) {
     return (
       <Card>
-        <CardContent className="py-10 text-center text-sm text-slate-500">
+        <CardContent className="py-10 text-center text-sm text-slate-400">
           Nothing scheduled for this day.
         </CardContent>
       </Card>

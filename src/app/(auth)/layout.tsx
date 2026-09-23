@@ -1,13 +1,18 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
+import { Aurora } from '@/components/marketing/aurora';
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-slate-50 px-4 py-12">
-      <Link href="/" className="mb-8 text-xl font-bold text-slate-900">
-        PostPilot<span className="text-brand-600">.ai</span>
+    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-[#070A1A] px-4 py-12">
+      <Aurora />
+      <Link href="/" className="relative mb-8 text-xl font-bold text-white">
+        PostPilot
+        <span className="bg-gradient-to-r from-indigo-400 to-fuchsia-400 bg-clip-text text-transparent">
+          .ai
+        </span>
       </Link>
-      <div className="w-full max-w-sm">{children}</div>
+      <div className="relative w-full max-w-sm">{children}</div>
     </div>
   );
 }

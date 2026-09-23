@@ -38,26 +38,26 @@ export function PreviewPost() {
         {isPending ? 'Writing…' : draft ? 'Write another' : 'Preview a sample post'}
       </Button>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-red-300">{error}</p>}
 
       {draft && (
-        <div className="rounded-xl border border-slate-200 bg-white p-4 text-left">
-          <span className="inline-block rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
+        <div className="rounded-xl border border-white/10 bg-white/[0.04] p-4 text-left">
+          <span className="inline-block rounded-full bg-white/10 px-2 py-0.5 text-xs font-medium text-slate-300">
             {draft.category.replace(/_/g, ' ')}
           </span>
 
-          <p className="mt-3 whitespace-pre-wrap text-sm text-slate-800">{draft.caption}</p>
+          <p className="mt-3 whitespace-pre-wrap text-sm text-white">{draft.caption}</p>
 
-          {draft.cta && <p className="mt-2 text-sm font-medium text-slate-900">{draft.cta}</p>}
+          {draft.cta && <p className="mt-2 text-sm font-medium text-white">{draft.cta}</p>}
 
           {draft.hashtags.length > 0 && (
-            <p className="mt-2 text-sm text-brand-600">
+            <p className="mt-2 text-sm text-indigo-300">
               {draft.hashtags.map((tag) => `#${tag}`).join(' ')}
             </p>
           )}
 
           {draft.imageIdea && (
-            <p className="mt-3 border-t border-slate-100 pt-3 text-xs text-slate-500">
+            <p className="mt-3 border-t border-white/5 pt-3 text-xs text-slate-400">
               Image idea: {draft.imageIdea}
             </p>
           )}

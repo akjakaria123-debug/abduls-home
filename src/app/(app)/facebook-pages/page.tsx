@@ -60,20 +60,20 @@ export default async function FacebookPagesPage({
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-semibold text-slate-900">Facebook Pages</h1>
-        <p className="text-sm text-slate-500">
+        <h1 className="text-xl font-semibold text-white">Facebook Pages</h1>
+        <p className="text-sm text-slate-400">
           Connect your Facebook account and choose which Pages we can post to.
         </p>
       </div>
 
       {searchParams.connected && (
-        <p className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+        <p className="rounded-lg border border-emerald-400/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-700">
           Facebook connected. Choose which Page{limit === 1 ? '' : 's'} to activate below.
         </p>
       )}
 
       {errorMessage && (
-        <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <p className="rounded-lg border border-red-400/30 bg-red-500/10 px-4 py-3 text-sm text-red-700">
           {errorMessage}
         </p>
       )}
@@ -82,14 +82,14 @@ export default async function FacebookPagesPage({
         <Card>
           <CardContent className="space-y-5 py-10 text-center">
             <div>
-              <p className="text-sm font-medium text-slate-900">No Facebook account connected</p>
-              <p className="mx-auto mt-1 max-w-md text-sm text-slate-500">
+              <p className="text-sm font-medium text-white">No Facebook account connected</p>
+              <p className="mx-auto mt-1 max-w-md text-sm text-slate-400">
                 We connect through the official Meta Graph API. You log in with Facebook directly —
                 we never see or store your password.
               </p>
             </div>
 
-            <ul className="mx-auto max-w-sm space-y-1 text-left text-xs text-slate-500">
+            <ul className="mx-auto max-w-sm space-y-1 text-left text-xs text-slate-400">
               <li>· See the list of Pages you manage</li>
               <li>· Publish posts to the Pages you activate</li>
               <li>· Read engagement on those posts, for your analytics</li>
@@ -104,8 +104,8 @@ export default async function FacebookPagesPage({
         <Card>
           <CardHeader className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h2 className="text-sm font-semibold text-slate-900">Your Pages</h2>
-              <p className="text-xs text-slate-500">
+              <h2 className="text-sm font-semibold text-white">Your Pages</h2>
+              <p className="text-xs text-slate-400">
                 {selectedCount} of {limit} active · connected{' '}
                 {new Date(connection.connected_at).toLocaleDateString('en-AU')}
               </p>
@@ -136,10 +136,10 @@ export default async function FacebookPagesPage({
                   />
                 ))}
                 {atLimit && (
-                  <p className="pt-3 text-xs text-slate-500">
+                  <p className="pt-3 text-xs text-slate-400">
                     You&apos;ve reached your plan&apos;s limit of {limit} active Page
                     {limit === 1 ? '' : 's'}. Deactivate one, or upgrade in{' '}
-                    <Link href="/billing" className="text-brand-600 hover:underline">
+                    <Link href="/billing" className="text-indigo-300 hover:underline">
                       Billing
                     </Link>
                     .
@@ -147,7 +147,7 @@ export default async function FacebookPagesPage({
                 )}
               </>
             ) : (
-              <p className="py-6 text-center text-sm text-slate-500">
+              <p className="py-6 text-center text-sm text-slate-400">
                 No Pages found on this connection.
               </p>
             )}

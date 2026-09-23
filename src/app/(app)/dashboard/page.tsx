@@ -94,8 +94,8 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-semibold text-slate-900">Welcome back</h1>
-        <p className="text-sm text-slate-500">Here&apos;s what&apos;s happening with {business.name}.</p>
+        <h1 className="text-xl font-semibold text-white">Welcome back</h1>
+        <p className="text-sm text-slate-400">Here&apos;s what&apos;s happening with {business.name}.</p>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -111,28 +111,28 @@ export default async function DashboardPage() {
 
       <Card>
         <CardHeader className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-slate-900">Next scheduled posts</h2>
-          <Link href="/calendar" className="text-sm text-brand-600 hover:underline">
+          <h2 className="text-sm font-semibold text-white">Next scheduled posts</h2>
+          <Link href="/calendar" className="text-sm text-indigo-300 hover:underline">
             View calendar
           </Link>
         </CardHeader>
         <CardContent>
           {upcomingPosts && upcomingPosts.length > 0 ? (
-            <ul className="divide-y divide-slate-100">
+            <ul className="divide-y divide-white/5">
               {upcomingPosts.map((post) => (
                 <li key={post.id} className="flex items-center justify-between gap-4 py-3 text-sm">
                   <div className="min-w-0">
-                    <p className="truncate font-medium text-slate-900">{post.caption}</p>
-                    <p className="text-slate-500 capitalize">{post.category.replace(/_/g, ' ')}</p>
+                    <p className="truncate font-medium text-white">{post.caption}</p>
+                    <p className="text-slate-400 capitalize">{post.category.replace(/_/g, ' ')}</p>
                   </div>
-                  <span className="shrink-0 text-slate-500">
+                  <span className="shrink-0 text-slate-400">
                     {post.scheduled_at ? new Date(post.scheduled_at).toLocaleString('en-AU') : '—'}
                   </span>
                 </li>
               ))}
             </ul>
           ) : (
-            <p className="py-6 text-center text-sm text-slate-500">
+            <p className="py-6 text-center text-sm text-slate-400">
               No posts scheduled yet. Connect Facebook and set up content generation to get started.
             </p>
           )}

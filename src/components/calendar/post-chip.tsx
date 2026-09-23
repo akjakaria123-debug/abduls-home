@@ -16,7 +16,7 @@ export function PostChip({
   return (
     <Link
       href={`/calendar?view=day&date=${dateKey}`}
-      className="block rounded-md border border-slate-100 bg-white px-2 py-1 text-left transition-colors hover:border-slate-200 hover:bg-slate-50"
+      className="block rounded-md border border-white/5 bg-white/[0.04] px-2 py-1 text-left transition-colors hover:border-white/10 hover:bg-white/5"
     >
       <span className="flex items-center gap-1.5">
         <span
@@ -26,12 +26,12 @@ export function PostChip({
           )}
         />
         {post.scheduledAt && (
-          <span className="shrink-0 text-[11px] font-medium text-slate-500">
+          <span className="shrink-0 text-[11px] font-medium text-slate-400">
             {formatTime(post.scheduledAt, timezone)}
           </span>
         )}
       </span>
-      <span className="mt-0.5 line-clamp-2 block text-[11px] leading-snug text-slate-600">
+      <span className="mt-0.5 line-clamp-2 block text-[11px] leading-snug text-slate-300">
         {post.caption}
       </span>
     </Link>

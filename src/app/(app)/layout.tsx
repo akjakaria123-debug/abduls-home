@@ -25,15 +25,15 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
 
   if (profile?.suspended_at) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
-        <div className="max-w-md rounded-xl border border-slate-200 bg-white p-8 text-center shadow-sm">
-          <h1 className="text-lg font-semibold text-slate-900">Account suspended</h1>
-          <p className="mt-2 text-sm text-slate-600">
+      <div className="flex min-h-screen items-center justify-center bg-[#070A1A] px-4">
+        <div className="max-w-md rounded-xl border border-white/10 bg-white/[0.04] p-8 text-center backdrop-blur">
+          <h1 className="text-lg font-semibold text-white">Account suspended</h1>
+          <p className="mt-2 text-sm text-slate-300">
             This account has been suspended and posts are no longer being published. If you think
             this is a mistake, please get in touch with support.
           </p>
           <form action={signOutAction} className="mt-5">
-            <button type="submit" className="text-sm font-medium text-brand-600 hover:underline">
+            <button type="submit" className="cursor-pointer text-sm font-medium text-indigo-300 hover:underline">
               Log out
             </button>
           </form>
@@ -67,7 +67,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
   ]);
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
+    <div className="flex min-h-screen bg-[#070A1A] text-slate-100">
       <Sidebar isAdmin={profile?.role === 'admin'} />
       <div className="flex flex-1 flex-col">
         <Topbar

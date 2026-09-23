@@ -42,22 +42,22 @@ export function PageRow({
   }
 
   return (
-    <div className="flex items-center justify-between gap-4 border-b border-slate-100 py-3 last:border-0">
+    <div className="flex items-center justify-between gap-4 border-b border-white/5 py-3 last:border-0">
       <div className="min-w-0">
-        <p className="truncate text-sm font-medium text-slate-900">{name}</p>
-        <p className={cn('text-xs', tokenStatus === 'valid' ? 'text-emerald-600' : 'text-amber-600')}>
+        <p className="truncate text-sm font-medium text-white">{name}</p>
+        <p className={cn('text-xs', tokenStatus === 'valid' ? 'text-emerald-300' : 'text-amber-300')}>
           {STATUS_LABELS[tokenStatus] ?? tokenStatus}
         </p>
-        {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
+        {error && <p className="mt-1 text-xs text-red-300">{error}</p>}
       </div>
 
-      <label className="flex shrink-0 cursor-pointer items-center gap-2 text-sm text-slate-600">
+      <label className="flex shrink-0 cursor-pointer items-center gap-2 text-sm text-slate-300">
         <input
           type="checkbox"
           checked={selected}
           disabled={isPending || (!selected && atLimit)}
           onChange={toggle}
-          className="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500 disabled:cursor-not-allowed"
+          className="h-4 w-4 rounded border-white/15 text-indigo-300 focus:ring-brand-500 disabled:cursor-not-allowed"
         />
         Active
       </label>

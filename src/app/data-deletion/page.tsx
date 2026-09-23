@@ -33,7 +33,7 @@ export default async function DataDeletionPage({
           className={
             request
               ? 'rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-4'
-              : 'rounded-lg border border-slate-200 bg-slate-50 px-4 py-4'
+              : 'rounded-lg border border-white/10 bg-white/[0.04] px-4 py-4'
           }
         >
           {request ? (
@@ -54,10 +54,10 @@ export default async function DataDeletionPage({
               </p>
             </>
           ) : (
-            <p className="text-sm text-slate-700">
+            <p className="text-sm text-slate-300">
               We couldn&rsquo;t find a deletion request with the reference{' '}
               <span className="font-mono">{code}</span>. Check the code, or email us at{' '}
-              <a href={`mailto:${LEGAL.contactEmail}`} className="text-brand-600 hover:underline">
+              <a href={`mailto:${LEGAL.contactEmail}`} className="text-indigo-300 hover:underline">
                 {LEGAL.contactEmail}
               </a>
               .
@@ -133,7 +133,7 @@ export default async function DataDeletionPage({
 
       <Section heading="Questions">
         <p>
-          <a href={`mailto:${LEGAL.contactEmail}`} className="text-brand-600 hover:underline">
+          <a href={`mailto:${LEGAL.contactEmail}`} className="text-indigo-300 hover:underline">
             {LEGAL.contactEmail}
           </a>
         </p>

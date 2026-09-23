@@ -81,8 +81,8 @@ export function UserRowActions({
         )}
       </div>
 
-      {message && <p className="text-right text-xs text-emerald-600">{message}</p>}
-      {error && <p className="text-right text-xs text-red-600">{error}</p>}
+      {message && <p className="text-right text-xs text-emerald-300">{message}</p>}
+      {error && <p className="text-right text-xs text-red-300">{error}</p>}
     </div>
   );
 }

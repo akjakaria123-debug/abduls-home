@@ -47,8 +47,8 @@ export default async function ContentPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-semibold text-slate-900">Content</h1>
-        <p className="text-sm text-slate-500">
+        <h1 className="text-xl font-semibold text-white">Content</h1>
+        <p className="text-sm text-slate-400">
           Generate a run of posts, then review them before they go out.
         </p>
       </div>
@@ -56,14 +56,14 @@ export default async function ContentPage() {
       {activePages.length === 0 ? (
         <Card>
           <CardContent className="space-y-4 py-10 text-center">
-            <p className="text-sm text-slate-600">
+            <p className="text-sm text-slate-300">
               Activate a Facebook Page before generating content.
             </p>
             <Link href="/facebook-pages">
               <Button>Go to Facebook Pages</Button>
             </Link>
-            <div className="mx-auto max-w-lg border-t border-slate-100 pt-6">
-              <p className="mb-3 text-sm text-slate-500">
+            <div className="mx-auto max-w-lg border-t border-white/5 pt-6">
+              <p className="mb-3 text-sm text-slate-400">
                 Not connected yet? See what the AI would write for your business.
               </p>
               <PreviewPost />
@@ -73,7 +73,7 @@ export default async function ContentPage() {
       ) : !hasCategories ? (
         <Card>
           <CardContent className="space-y-4 py-10 text-center">
-            <p className="text-sm text-slate-600">
+            <p className="text-sm text-slate-300">
               Choose which types of content you want before generating.
             </p>
             <Link href="/settings">
@@ -109,7 +109,7 @@ export default async function ContentPage() {
         </div>
       ) : (
         <Card>
-          <CardContent className="py-10 text-center text-sm text-slate-500">
+          <CardContent className="py-10 text-center text-sm text-slate-400">
             No posts yet. Generate your first run above.
           </CardContent>
         </Card>

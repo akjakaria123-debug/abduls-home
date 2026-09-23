@@ -52,23 +52,23 @@ export function ContentPreferencesForm({
   return (
     <Card>
       <CardHeader>
-        <h2 className="text-sm font-semibold text-slate-900">Content settings</h2>
-        <p className="text-xs text-slate-500">What we write, how often, and when it goes out.</p>
+        <h2 className="text-sm font-semibold text-white">Content settings</h2>
+        <p className="text-xs text-slate-400">What we write, how often, and when it goes out.</p>
       </CardHeader>
 
       <CardContent>
         <form action={formAction} className="space-y-6">
           <fieldset>
-            <legend className="mb-2 text-sm font-medium text-slate-700">Content types</legend>
+            <legend className="mb-2 text-sm font-medium text-slate-300">Content types</legend>
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
               {ALL_CONTENT_CATEGORIES.map((category) => (
-                <label key={category} className="flex items-center gap-2 text-sm text-slate-600">
+                <label key={category} className="flex items-center gap-2 text-sm text-slate-300">
                   <input
                     type="checkbox"
                     name="enabledCategories"
                     value={category}
                     defaultChecked={enabledCategories.includes(category)}
-                    className="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
+                    className="h-4 w-4 rounded border-white/15 text-indigo-300 focus:ring-brand-500"
                   />
                   {formatCategory(category)}
                 </label>
@@ -100,19 +100,19 @@ export function ContentPreferencesForm({
           </div>
 
           <fieldset>
-            <legend className="mb-2 text-sm font-medium text-slate-700">Posting days</legend>
+            <legend className="mb-2 text-sm font-medium text-slate-300">Posting days</legend>
             <div className="flex flex-wrap gap-2">
               {DAYS.map((day) => (
                 <label
                   key={day.value}
-                  className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-slate-600"
+                  className="flex items-center gap-2 rounded-lg border border-white/10 px-3 py-1.5 text-sm text-slate-300"
                 >
                   <input
                     type="checkbox"
                     name="postingDays"
                     value={day.value}
                     defaultChecked={postingDays.includes(day.value)}
-                    className="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
+                    className="h-4 w-4 rounded border-white/15 text-indigo-300 focus:ring-brand-500"
                   />
                   {day.label}
                 </label>
@@ -121,7 +121,7 @@ export function ContentPreferencesForm({
           </fieldset>
 
           <fieldset>
-            <legend className="mb-2 text-sm font-medium text-slate-700">Posting times</legend>
+            <legend className="mb-2 text-sm font-medium text-slate-300">Posting times</legend>
             <div className="space-y-2">
               {times.map((time, index) => (
                 <div key={index} className="flex items-center gap-2">
@@ -135,13 +135,13 @@ export function ContentPreferencesForm({
                       setTimes(next);
                     }}
                     required
-                    className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
+                    className="rounded-lg border border-white/15 bg-white/[0.04] px-3 py-2 text-sm text-white focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
                   />
                   {times.length > 1 && (
                     <button
                       type="button"
                       onClick={() => setTimes(times.filter((_, i) => i !== index))}
-                      className="rounded-lg p-2 text-slate-400 hover:bg-slate-50 hover:text-slate-600"
+                      className="rounded-lg p-2 text-slate-400 hover:bg-white/5 hover:text-slate-300"
                       aria-label="Remove time"
                     >
                       <X className="h-4 w-4" />
@@ -155,7 +155,7 @@ export function ContentPreferencesForm({
               <button
                 type="button"
                 onClick={() => setTimes([...times, '12:00'])}
-                className="mt-2 inline-flex items-center gap-1 text-sm text-brand-600 hover:underline"
+                className="mt-2 inline-flex items-center gap-1 text-sm text-indigo-300 hover:underline"
               >
                 <Plus className="h-4 w-4" />
                 Add time

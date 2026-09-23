@@ -103,12 +103,12 @@ export function PostEditor({ post, timezone }: { post: CalendarPost; timezone: s
             <span
               className={cn(
                 'rounded-full px-2 py-0.5 text-xs font-medium capitalize',
-                STATUS_STYLES[post.status] ?? 'bg-slate-100 text-slate-600'
+                STATUS_STYLES[post.status] ?? 'bg-white/10 text-slate-300'
               )}
             >
               {post.status}
             </span>
-            <span className="text-xs capitalize text-slate-500">
+            <span className="text-xs capitalize text-slate-400">
               {post.category.replace(/_/g, ' ')}
             </span>
             <span className="text-xs text-slate-400">
@@ -124,7 +124,7 @@ export function PostEditor({ post, timezone }: { post: CalendarPost; timezone: s
                 onClick={() => run(() => retryPostAction(post.id))}
                 disabled={isPending}
                 title="Try publishing again"
-                className="rounded-lg p-1.5 text-slate-400 hover:bg-emerald-50 hover:text-emerald-600 disabled:opacity-50"
+                className="rounded-lg p-1.5 text-slate-400 hover:bg-emerald-500/10 hover:text-emerald-300 disabled:opacity-50"
               >
                 <RotateCcw className="h-4 w-4" />
               </button>
@@ -138,7 +138,7 @@ export function PostEditor({ post, timezone }: { post: CalendarPost; timezone: s
                     onClick={() => run(() => unapprovePostAction(post.id))}
                     disabled={isPending}
                     title="Move back to draft"
-                    className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-50 hover:text-slate-700 disabled:opacity-50"
+                    className="rounded-lg p-1.5 text-slate-400 hover:bg-white/5 hover:text-slate-300 disabled:opacity-50"
                   >
                     <Undo2 className="h-4 w-4" />
                   </button>
@@ -148,7 +148,7 @@ export function PostEditor({ post, timezone }: { post: CalendarPost; timezone: s
                     onClick={() => run(() => approvePostAction(post.id))}
                     disabled={isPending}
                     title="Approve"
-                    className="rounded-lg p-1.5 text-slate-400 hover:bg-emerald-50 hover:text-emerald-600 disabled:opacity-50"
+                    className="rounded-lg p-1.5 text-slate-400 hover:bg-emerald-500/10 hover:text-emerald-300 disabled:opacity-50"
                   >
                     <Check className="h-4 w-4" />
                   </button>
@@ -161,7 +161,7 @@ export function PostEditor({ post, timezone }: { post: CalendarPost; timezone: s
                     setRescheduling(false);
                   }}
                   title="Edit"
-                  className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-50 hover:text-slate-700"
+                  className="rounded-lg p-1.5 text-slate-400 hover:bg-white/5 hover:text-slate-300"
                 >
                   <Pencil className="h-4 w-4" />
                 </button>
@@ -173,7 +173,7 @@ export function PostEditor({ post, timezone }: { post: CalendarPost; timezone: s
                     setEditing(false);
                   }}
                   title="Reschedule"
-                  className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-50 hover:text-slate-700"
+                  className="rounded-lg p-1.5 text-slate-400 hover:bg-white/5 hover:text-slate-300"
                 >
                   <CalendarClock className="h-4 w-4" />
                 </button>
@@ -183,7 +183,7 @@ export function PostEditor({ post, timezone }: { post: CalendarPost; timezone: s
                   onClick={() => run(() => regeneratePostAction(post.id))}
                   disabled={isPending}
                   title="Rewrite with AI"
-                  className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-50 hover:text-brand-600 disabled:opacity-50"
+                  className="rounded-lg p-1.5 text-slate-400 hover:bg-white/5 hover:text-indigo-300 disabled:opacity-50"
                 >
                   <RefreshCw className={cn('h-4 w-4', isPending && 'animate-spin')} />
                 </button>
@@ -196,7 +196,7 @@ export function PostEditor({ post, timezone }: { post: CalendarPost; timezone: s
                 target="_blank"
                 rel="noopener noreferrer"
                 title="View on Facebook"
-                className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-50 hover:text-brand-600"
+                className="rounded-lg p-1.5 text-slate-400 hover:bg-white/5 hover:text-indigo-300"
               >
                 <ExternalLink className="h-4 w-4" />
               </a>
@@ -207,7 +207,7 @@ export function PostEditor({ post, timezone }: { post: CalendarPost; timezone: s
               onClick={() => run(() => duplicatePostAction(post.id))}
               disabled={isPending}
               title="Duplicate"
-              className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-50 hover:text-slate-700 disabled:opacity-50"
+              className="rounded-lg p-1.5 text-slate-400 hover:bg-white/5 hover:text-slate-300 disabled:opacity-50"
             >
               <Copy className="h-4 w-4" />
             </button>
@@ -217,7 +217,7 @@ export function PostEditor({ post, timezone }: { post: CalendarPost; timezone: s
               onClick={handleDelete}
               disabled={isPending}
               title="Delete"
-              className="rounded-lg p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
+              className="rounded-lg p-1.5 text-slate-400 hover:bg-red-500/10 hover:text-red-300 disabled:opacity-50"
             >
               <Trash2 className="h-4 w-4" />
             </button>
@@ -264,7 +264,7 @@ export function PostEditor({ post, timezone }: { post: CalendarPost; timezone: s
               <button
                 type="button"
                 onClick={() => setEditing(false)}
-                className="text-sm text-slate-500 hover:underline"
+                className="text-sm text-slate-400 hover:underline"
               >
                 Cancel
               </button>
@@ -272,15 +272,15 @@ export function PostEditor({ post, timezone }: { post: CalendarPost; timezone: s
           </form>
         ) : (
           <>
-            <p className="whitespace-pre-wrap text-sm text-slate-800">{post.caption}</p>
-            {post.cta && <p className="text-sm font-medium text-slate-900">{post.cta}</p>}
+            <p className="whitespace-pre-wrap text-sm text-white">{post.caption}</p>
+            {post.cta && <p className="text-sm font-medium text-white">{post.cta}</p>}
             {post.hashtags.length > 0 && (
-              <p className="text-xs text-brand-600">
+              <p className="text-xs text-indigo-300">
                 {post.hashtags.map((tag) => `#${tag}`).join(' ')}
               </p>
             )}
             {post.imageIdea && (
-              <p className="rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-500">
+              <p className="rounded-lg bg-white/[0.04] px-3 py-2 text-xs text-slate-400">
                 Image idea: {post.imageIdea}
               </p>
             )}
@@ -298,7 +298,7 @@ export function PostEditor({ post, timezone }: { post: CalendarPost; timezone: s
                 name="scheduledLocal"
                 defaultValue={toLocalInputValue(post.scheduledAt, timezone)}
                 required
-                className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
+                className="rounded-lg border border-white/15 bg-white/[0.04] px-3 py-2 text-sm text-white focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
               />
             </div>
             <SubmitButton size="sm" pendingText="Moving…">
@@ -307,7 +307,7 @@ export function PostEditor({ post, timezone }: { post: CalendarPost; timezone: s
             <button
               type="button"
               onClick={() => setRescheduling(false)}
-              className="pb-2 text-sm text-slate-500 hover:underline"
+              className="pb-2 text-sm text-slate-400 hover:underline"
             >
               Cancel
             </button>
@@ -321,7 +321,7 @@ export function PostEditor({ post, timezone }: { post: CalendarPost; timezone: s
         )}
 
         {post.errorMessage && (
-          <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
+          <p className="rounded-lg border border-red-400/30 bg-red-500/10 px-3 py-2 text-xs text-red-700">
             {post.errorMessage}
           </p>
         )}

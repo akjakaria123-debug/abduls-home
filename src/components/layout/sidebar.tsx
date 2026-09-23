@@ -28,10 +28,13 @@ export function Sidebar({ isAdmin = false }: { isAdmin?: boolean }) {
   const pathname = usePathname();
 
   return (
-    <aside className="hidden w-60 shrink-0 border-r border-slate-200 bg-white lg:block">
+    <aside className="hidden w-60 shrink-0 border-r border-white/5 bg-[#0A0E22] lg:block">
       <div className="flex h-16 items-center px-6">
-        <Link href="/dashboard" className="text-lg font-bold text-slate-900">
-          PostPilot<span className="text-brand-600">.ai</span>
+        <Link href="/dashboard" className="text-lg font-bold text-white">
+          PostPilot
+          <span className="bg-gradient-to-r from-indigo-400 to-fuchsia-400 bg-clip-text text-transparent">
+            .ai
+          </span>
         </Link>
       </div>
       <nav className="space-y-1 px-3">
@@ -44,7 +47,9 @@ export function Sidebar({ isAdmin = false }: { isAdmin?: boolean }) {
               href={item.href}
               className={cn(
                 'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-                active ? 'bg-brand-50 text-brand-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                active
+                  ? 'bg-indigo-500/15 text-white ring-1 ring-inset ring-indigo-400/20'
+                  : 'text-slate-400 hover:bg-white/5 hover:text-white'
               )}
             >
               <Icon className="h-4 w-4" />
@@ -56,7 +61,7 @@ export function Sidebar({ isAdmin = false }: { isAdmin?: boolean }) {
         {isAdmin && (
           <Link
             href="/admin"
-            className="mt-4 flex items-center gap-3 rounded-lg border-t border-slate-100 px-3 pb-2 pt-4 text-sm font-medium text-slate-600 hover:text-slate-900"
+            className="mt-4 flex items-center gap-3 rounded-lg border-t border-white/5 px-3 pb-2 pt-4 text-sm font-medium text-slate-400 hover:text-white"
           >
             <ShieldCheck className="h-4 w-4" />
             Admin

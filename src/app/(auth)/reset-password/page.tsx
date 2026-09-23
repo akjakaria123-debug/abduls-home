@@ -17,8 +17,8 @@ export default function ResetPasswordPage() {
     <Card>
       <CardContent className="space-y-5">
         <div>
-          <h1 className="text-lg font-semibold text-slate-900">Set a new password</h1>
-          <p className="text-sm text-slate-500">Choose a new password for your account.</p>
+          <h1 className="text-lg font-semibold text-white">Set a new password</h1>
+          <p className="text-sm text-slate-400">Choose a new password for your account.</p>
         </div>
 
         <form action={formAction} className="space-y-4">

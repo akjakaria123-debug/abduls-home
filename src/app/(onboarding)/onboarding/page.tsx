@@ -36,8 +36,8 @@ export default function OnboardingPage() {
   return (
     <div className="mx-auto max-w-2xl px-4 py-12">
       <div className="mb-8 text-center">
-        <h1 className="text-2xl font-bold text-slate-900">Tell us about your business</h1>
-        <p className="mt-1 text-sm text-slate-500">
+        <h1 className="text-2xl font-bold text-white">Tell us about your business</h1>
+        <p className="mt-1 text-sm text-slate-400">
           This powers every post the AI writes for you — the more accurate, the better the content.
         </p>
       </div>
@@ -45,7 +45,7 @@ export default function OnboardingPage() {
       <form action={formAction} className="space-y-6">
         <Card>
           <CardHeader>
-            <h2 className="text-sm font-semibold text-slate-900">Business basics</h2>
+            <h2 className="text-sm font-semibold text-white">Business basics</h2>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
@@ -65,7 +65,7 @@ export default function OnboardingPage() {
 
         <Card>
           <CardHeader>
-            <h2 className="text-sm font-semibold text-slate-900">Contact & location</h2>
+            <h2 className="text-sm font-semibold text-white">Contact & location</h2>
           </CardHeader>
           <CardContent className="grid gap-4 sm:grid-cols-2">
             <div>
@@ -89,7 +89,7 @@ export default function OnboardingPage() {
 
         <Card>
           <CardHeader>
-            <h2 className="text-sm font-semibold text-slate-900">Audience & offers</h2>
+            <h2 className="text-sm font-semibold text-white">Audience & offers</h2>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
@@ -109,7 +109,7 @@ export default function OnboardingPage() {
 
         <Card>
           <CardHeader>
-            <h2 className="text-sm font-semibold text-slate-900">Brand & preferences</h2>
+            <h2 className="text-sm font-semibold text-white">Brand & preferences</h2>
           </CardHeader>
           <CardContent className="grid gap-4 sm:grid-cols-3">
             <div>

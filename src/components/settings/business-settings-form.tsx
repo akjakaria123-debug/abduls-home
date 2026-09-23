@@ -56,8 +56,8 @@ export function BusinessSettingsForm({ business }: { business: BusinessSettings 
   return (
     <Card>
       <CardHeader>
-        <h2 className="text-sm font-semibold text-slate-900">Business & language</h2>
-        <p className="text-xs text-slate-500">
+        <h2 className="text-sm font-semibold text-white">Business & language</h2>
+        <p className="text-xs text-slate-400">
           Everything the AI knows about you. The more accurate, the better the posts.
         </p>
       </CardHeader>

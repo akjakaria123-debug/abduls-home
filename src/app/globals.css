@@ -11,9 +11,12 @@ html {
   scroll-behavior: smooth;
 }
 
+/* The whole product is dark now, so this is the ground everywhere. A
+   page that forgets to set its own background still looks right rather
+   than rendering white text on white. */
 body {
-  background-color: #fff;
-  color: #0f172a;
+  background-color: #070a1a;
+  color: #e2e8f0;
 }
 
 /* ---------------------------------------------------------------

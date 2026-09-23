@@ -2,7 +2,10 @@ export function FormMessage({ error, success }: { error?: string; success?: stri
   if (!error && !success) return null;
 
   return (
-    <p className={error ? 'text-sm text-red-600' : 'text-sm text-emerald-600'} role={error ? 'alert' : 'status'}>
+    <p
+      className={error ? 'text-sm text-red-300' : 'text-sm text-emerald-300'}
+      role={error ? 'alert' : 'status'}
+    >
       {error ?? success}
     </p>
   );

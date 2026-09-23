@@ -18,8 +18,8 @@ export default function SignUpPage() {
     <Card>
       <CardContent className="space-y-5">
         <div>
-          <h1 className="text-lg font-semibold text-slate-900">Start your free trial</h1>
-          <p className="text-sm text-slate-500">7 days free. No credit card required.</p>
+          <h1 className="text-lg font-semibold text-white">Start your free trial</h1>
+          <p className="text-sm text-slate-400">7 days free. No credit card required.</p>
         </div>
 
         <form action={formAction} className="space-y-4">
@@ -46,10 +46,10 @@ export default function SignUpPage() {
 
         <div className="relative">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-slate-200" />
+            <div className="w-full border-t border-white/10" />
           </div>
           <div className="relative flex justify-center text-xs">
-            <span className="bg-white px-2 text-slate-400">or</span>
+            <span className="bg-[#12162a] px-2 text-slate-400">or</span>
           </div>
         </div>
 
@@ -59,9 +59,9 @@ export default function SignUpPage() {
           </SubmitButton>
         </form>
 
-        <p className="text-center text-sm text-slate-500">
+        <p className="text-center text-sm text-slate-400">
           Already have an account?{' '}
-          <Link href="/login" className="font-medium text-brand-600 hover:underline">
+          <Link href="/login" className="font-medium text-indigo-300 hover:underline">
             Log in
           </Link>
         </p>

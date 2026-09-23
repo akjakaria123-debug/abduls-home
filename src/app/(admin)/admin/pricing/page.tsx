@@ -12,8 +12,8 @@ export default async function AdminPricingPage() {
   return (
     <div className="space-y-5">
       <div>
-        <h1 className="text-xl font-semibold text-slate-900">Pricing & limits</h1>
-        <p className="text-sm text-slate-500">
+        <h1 className="text-xl font-semibold text-white">Pricing & limits</h1>
+        <p className="text-sm text-slate-400">
           These drive the marketing page, checkout, and what each plan is allowed to do.
         </p>
       </div>

@@ -39,8 +39,8 @@ export default async function SettingsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-semibold text-slate-900">Settings</h1>
-        <p className="text-sm text-slate-500">
+        <h1 className="text-xl font-semibold text-white">Settings</h1>
+        <p className="text-sm text-slate-400">
           {business.name} · times shown in {business.timezone}
         </p>
       </div>

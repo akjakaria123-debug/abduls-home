@@ -26,7 +26,7 @@ export function DisconnectButton() {
       <Button type="button" variant="outline" size="sm" onClick={handleClick} disabled={isPending}>
         {isPending ? 'Disconnecting…' : 'Disconnect'}
       </Button>
-      {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
+      {error && <p className="mt-1 text-xs text-red-300">{error}</p>}
     </div>
   );
 }

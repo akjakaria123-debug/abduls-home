@@ -34,8 +34,8 @@ export function PlanEditor({
   return (
     <Card>
       <CardHeader>
-        <h2 className="text-sm font-semibold text-slate-900">{name}</h2>
-        <p className="text-xs text-slate-500">key: {planKey}</p>
+        <h2 className="text-sm font-semibold text-white">{name}</h2>
+        <p className="text-xs text-slate-400">key: {planKey}</p>
       </CardHeader>
 
       <CardContent>
@@ -98,12 +98,12 @@ export function PlanEditor({
             </p>
           </div>
 
-          <label className="flex items-center gap-2 text-sm text-slate-600">
+          <label className="flex items-center gap-2 text-sm text-slate-300">
             <input
               type="checkbox"
               name="isActive"
               defaultChecked={isActive}
-              className="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
+              className="h-4 w-4 rounded border-white/15 text-indigo-300 focus:ring-brand-500"
             />
             Show this plan publicly
           </label>

@@ -28,8 +28,8 @@ export function RefreshInsightsButton() {
         <RefreshCw className={cn('h-4 w-4', isPending && 'animate-spin')} />
         {isPending ? 'Checking…' : 'Refresh'}
       </Button>
-      {message && <p className="mt-1 text-xs text-emerald-600">{message}</p>}
-      {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
+      {message && <p className="mt-1 text-xs text-emerald-300">{message}</p>}
+      {error && <p className="mt-1 text-xs text-red-300">{error}</p>}
     </div>
   );
 }

@@ -19,8 +19,8 @@ export default function ForgotPasswordPage() {
     <Card>
       <CardContent className="space-y-5">
         <div>
-          <h1 className="text-lg font-semibold text-slate-900">Reset your password</h1>
-          <p className="text-sm text-slate-500">We&apos;ll email you a link to reset it.</p>
+          <h1 className="text-lg font-semibold text-white">Reset your password</h1>
+          <p className="text-sm text-slate-400">We&apos;ll email you a link to reset it.</p>
         </div>
 
         {submitted ? (
@@ -40,8 +40,8 @@ export default function ForgotPasswordPage() {
           </form>
         )}
 
-        <p className="text-center text-sm text-slate-500">
-          <Link href="/login" className="font-medium text-brand-600 hover:underline">
+        <p className="text-center text-sm text-slate-400">
+          <Link href="/login" className="font-medium text-indigo-300 hover:underline">
             Back to login
           </Link>
         </p>

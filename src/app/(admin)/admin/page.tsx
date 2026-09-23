@@ -9,8 +9,8 @@ function Stat({ label, value, hint }: { label: string; value: string | number; h
   return (
     <Card>
       <CardContent>
-        <p className="text-xs uppercase tracking-wide text-slate-500">{label}</p>
-        <p className="text-2xl font-semibold text-slate-900">{value}</p>
+        <p className="text-xs uppercase tracking-wide text-slate-400">{label}</p>
+        <p className="text-2xl font-semibold text-white">{value}</p>
         {hint && <p className="mt-0.5 text-xs text-slate-400">{hint}</p>}
       </CardContent>
     </Card>
@@ -69,8 +69,8 @@ export default async function AdminOverviewPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-semibold text-slate-900">Overview</h1>
-        <p className="text-sm text-slate-500">Everything across all accounts.</p>
+        <h1 className="text-xl font-semibold text-white">Overview</h1>
+        <p className="text-sm text-slate-400">Everything across all accounts.</p>
       </div>
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
@@ -96,12 +96,12 @@ export default async function AdminOverviewPage() {
 
       <Card>
         <CardHeader>
-          <h2 className="text-sm font-semibold text-slate-900">Plans</h2>
+          <h2 className="text-sm font-semibold text-white">Plans</h2>
         </CardHeader>
         <CardContent className="overflow-x-auto p-0">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-slate-100 text-left text-xs uppercase tracking-wide text-slate-500">
+              <tr className="border-b border-white/5 text-left text-xs uppercase tracking-wide text-slate-400">
                 <th className="px-5 py-2 font-medium">Plan</th>
                 <th className="px-3 py-2 text-right font-medium">Price</th>
                 <th className="px-3 py-2 text-right font-medium">Pages</th>
@@ -112,7 +112,7 @@ export default async function AdminOverviewPage() {
             <tbody>
               {(plans ?? []).map((plan) => (
                 <tr key={plan.id} className="border-b border-slate-50 last:border-0">
-                  <td className="px-5 py-3 text-slate-800">
+                  <td className="px-5 py-3 text-white">
                     {plan.name}
                     {!plan.is_active && <span className="ml-2 text-xs text-slate-400">hidden</span>}
                   </td>

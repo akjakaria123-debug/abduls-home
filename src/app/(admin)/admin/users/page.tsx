@@ -25,15 +25,15 @@ export default async function AdminUsersPage() {
   return (
     <div className="space-y-5">
       <div>
-        <h1 className="text-xl font-semibold text-slate-900">Users</h1>
-        <p className="text-sm text-slate-500">{profiles?.length ?? 0} most recent accounts.</p>
+        <h1 className="text-xl font-semibold text-white">Users</h1>
+        <p className="text-sm text-slate-400">{profiles?.length ?? 0} most recent accounts.</p>
       </div>
 
       <Card>
         <CardContent className="overflow-x-auto p-0">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-slate-100 text-left text-xs uppercase tracking-wide text-slate-500">
+              <tr className="border-b border-white/5 text-left text-xs uppercase tracking-wide text-slate-400">
                 <th className="px-5 py-2 font-medium">User</th>
                 <th className="px-3 py-2 font-medium">Business</th>
                 <th className="px-3 py-2 font-medium">Status</th>
@@ -51,7 +51,7 @@ export default async function AdminUsersPage() {
                 return (
                   <tr key={profile.id} className="border-b border-slate-50 last:border-0">
                     <td className="px-5 py-3">
-                      <p className="text-slate-800">{profile.full_name ?? 'Unnamed'}</p>
+                      <p className="text-white">{profile.full_name ?? 'Unnamed'}</p>
                       <p className="text-xs text-slate-400">
                         {profile.role === 'admin' && 'admin · '}
                         joined{' '}
@@ -60,14 +60,14 @@ export default async function AdminUsersPage() {
                         })}
                       </p>
                     </td>
-                    <td className="px-3 py-3 text-slate-700">{business?.name ?? '—'}</td>
+                    <td className="px-3 py-3 text-slate-300">{business?.name ?? '—'}</td>
                     <td className="px-3 py-3">
                       {suspended ? (
                         <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700">
                           Suspended
                         </span>
                       ) : (
-                        <span className="text-xs capitalize text-slate-600">
+                        <span className="text-xs capitalize text-slate-300">
                           {subscription?.status?.replace(/_/g, ' ') ?? 'no subscription'}
                         </span>
                       )}

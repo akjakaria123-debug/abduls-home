@@ -104,8 +104,8 @@ export default async function CalendarPage({
   return (
     <div className="space-y-5">
       <div>
-        <h1 className="text-xl font-semibold text-slate-900">Calendar</h1>
-        <p className="text-sm text-slate-500">
+        <h1 className="text-xl font-semibold text-white">Calendar</h1>
+        <p className="text-sm text-slate-400">
           Everything queued up, in {timezone}. Open a day to edit or approve its posts.
         </p>
       </div>
@@ -144,8 +144,8 @@ export default async function CalendarPage({
       {unscheduledPosts.length > 0 && (
         <Card>
           <CardHeader>
-            <h2 className="text-sm font-semibold text-slate-900">Unscheduled</h2>
-            <p className="text-xs text-slate-500">
+            <h2 className="text-sm font-semibold text-white">Unscheduled</h2>
+            <p className="text-xs text-slate-400">
               These have no time yet — pick one with the reschedule button.
             </p>
           </CardHeader>

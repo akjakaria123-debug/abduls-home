@@ -25,8 +25,8 @@ export function BrandProfileForm({
   return (
     <Card>
       <CardHeader>
-        <h2 className="text-sm font-semibold text-slate-900">Brand profile</h2>
-        <p className="text-xs text-slate-500">Fine-tune how the AI sounds when it writes for you.</p>
+        <h2 className="text-sm font-semibold text-white">Brand profile</h2>
+        <p className="text-xs text-slate-400">Fine-tune how the AI sounds when it writes for you.</p>
       </CardHeader>
 
       <CardContent>

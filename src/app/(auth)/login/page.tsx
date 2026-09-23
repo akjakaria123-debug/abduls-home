@@ -18,8 +18,8 @@ export default function LoginPage() {
     <Card>
       <CardContent className="space-y-5">
         <div>
-          <h1 className="text-lg font-semibold text-slate-900">Log in</h1>
-          <p className="text-sm text-slate-500">Welcome back. Enter your details below.</p>
+          <h1 className="text-lg font-semibold text-white">Log in</h1>
+          <p className="text-sm text-slate-400">Welcome back. Enter your details below.</p>
         </div>
 
         <form action={formAction} className="space-y-4">
@@ -30,7 +30,7 @@ export default function LoginPage() {
           <div>
             <div className="flex items-center justify-between">
               <Label htmlFor="password">Password</Label>
-              <Link href="/forgot-password" className="text-sm text-brand-600 hover:underline">
+              <Link href="/forgot-password" className="text-sm text-indigo-300 hover:underline">
                 Forgot password?
               </Link>
             </div>
@@ -46,10 +46,10 @@ export default function LoginPage() {
 
         <div className="relative">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-slate-200" />
+            <div className="w-full border-t border-white/10" />
           </div>
           <div className="relative flex justify-center text-xs">
-            <span className="bg-white px-2 text-slate-400">or</span>
+            <span className="bg-[#12162a] px-2 text-slate-400">or</span>
           </div>
         </div>
 
@@ -59,9 +59,9 @@ export default function LoginPage() {
           </SubmitButton>
         </form>
 
-        <p className="text-center text-sm text-slate-500">
+        <p className="text-center text-sm text-slate-400">
           Don&apos;t have an account?{' '}
-          <Link href="/signup" className="font-medium text-brand-600 hover:underline">
+          <Link href="/signup" className="font-medium text-indigo-300 hover:underline">
             Start free trial
           </Link>
         </p>

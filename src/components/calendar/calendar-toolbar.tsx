@@ -28,34 +28,34 @@ export function CalendarToolbar({
         <Link
           href={href(view, previousAnchor)}
           aria-label="Previous"
-          className="rounded-lg border border-slate-200 bg-white p-2 text-slate-600 hover:bg-slate-50"
+          className="rounded-lg border border-white/10 bg-white/[0.04] p-2 text-slate-300 hover:bg-white/5"
         >
           <ChevronLeft className="h-4 w-4" />
         </Link>
         <Link
           href={href(view, nextAnchor)}
           aria-label="Next"
-          className="rounded-lg border border-slate-200 bg-white p-2 text-slate-600 hover:bg-slate-50"
+          className="rounded-lg border border-white/10 bg-white/[0.04] p-2 text-slate-300 hover:bg-white/5"
         >
           <ChevronRight className="h-4 w-4" />
         </Link>
         <Link
           href={href(view, todayAnchor)}
-          className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+          className="rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-sm font-medium text-slate-300 hover:bg-white/5"
         >
           Today
         </Link>
-        <h2 className="ml-1 text-sm font-semibold text-slate-900">{label}</h2>
+        <h2 className="ml-1 text-sm font-semibold text-white">{label}</h2>
       </div>
 
-      <div className="flex rounded-lg border border-slate-200 bg-white p-0.5">
+      <div className="flex rounded-lg border border-white/10 bg-white/[0.04] p-0.5">
         {CALENDAR_VIEWS.map((option) => (
           <Link
             key={option}
             href={href(option, anchor)}
             className={cn(
               'rounded-md px-3 py-1.5 text-sm font-medium capitalize transition-colors',
-              option === view ? 'bg-brand-600 text-white' : 'text-slate-600 hover:bg-slate-50'
+              option === view ? 'bg-indigo-600 text-white' : 'text-slate-300 hover:bg-white/5'
             )}
           >
             {option}

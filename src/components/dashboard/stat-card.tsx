@@ -13,12 +13,12 @@ export function StatCard({
   return (
     <Card>
       <CardContent className="flex items-center gap-4">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-600">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-indigo-500/15 text-indigo-300">
           <Icon className="h-5 w-5" />
         </span>
         <div className="min-w-0">
-          <p className="truncate text-xs font-medium uppercase tracking-wide text-slate-500">{label}</p>
-          <p className="truncate text-lg font-semibold text-slate-900">{value}</p>
+          <p className="truncate text-xs font-medium uppercase tracking-wide text-slate-400">{label}</p>
+          <p className="truncate text-lg font-semibold text-white">{value}</p>
         </div>
       </CardContent>
     </Card>

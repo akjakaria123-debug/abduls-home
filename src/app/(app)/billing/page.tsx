@@ -70,23 +70,23 @@ export default async function BillingPage({
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-semibold text-slate-900">Billing</h1>
-        <p className="text-sm text-slate-500">Your plan, usage, and payment details.</p>
+        <h1 className="text-xl font-semibold text-white">Billing</h1>
+        <p className="text-sm text-slate-400">Your plan, usage, and payment details.</p>
       </div>
 
       {searchParams.checkout === 'success' && (
-        <p className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+        <p className="rounded-lg border border-emerald-400/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-700">
           Thanks — your subscription is being set up. It may take a few seconds to appear here.
         </p>
       )}
       {searchParams.checkout === 'cancelled' && (
-        <p className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+        <p className="rounded-lg border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-slate-300">
           Checkout cancelled. Nothing has been charged.
         </p>
       )}
 
       {warning && (
-        <p className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+        <p className="rounded-lg border border-amber-400/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-800">
           {warning}
         </p>
       )}
@@ -94,11 +94,11 @@ export default async function BillingPage({
       <Card>
         <CardHeader className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h2 className="text-sm font-semibold text-slate-900">
+            <h2 className="text-sm font-semibold text-white">
               {currentPlan ? currentPlan.name : 'No plan'} ·{' '}
               {subscription ? STATUS_LABELS[subscription.status] ?? subscription.status : 'None'}
             </h2>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-slate-400">
               {subscription?.status === 'trialing'
                 ? `Trial ends ${formatDate(subscription.trial_ends_at)}`
                 : subscription?.cancel_at_period_end
@@ -113,26 +113,26 @@ export default async function BillingPage({
 
         <CardContent className="grid grid-cols-2 gap-4 sm:grid-cols-4">
           <div>
-            <p className="text-xs uppercase tracking-wide text-slate-500">Pages allowed</p>
-            <p className="text-lg font-semibold text-slate-900">{entitlements.maxPages}</p>
+            <p className="text-xs uppercase tracking-wide text-slate-400">Pages allowed</p>
+            <p className="text-lg font-semibold text-white">{entitlements.maxPages}</p>
           </div>
           <div>
-            <p className="text-xs uppercase tracking-wide text-slate-500">Posts/day</p>
-            <p className="text-lg font-semibold text-slate-900">{entitlements.maxPostsPerDay}</p>
+            <p className="text-xs uppercase tracking-wide text-slate-400">Posts/day</p>
+            <p className="text-lg font-semibold text-white">{entitlements.maxPostsPerDay}</p>
           </div>
           <div>
-            <p className="text-xs uppercase tracking-wide text-slate-500">Generated this month</p>
-            <p className="text-lg font-semibold text-slate-900">{usage?.posts_generated ?? 0}</p>
+            <p className="text-xs uppercase tracking-wide text-slate-400">Generated this month</p>
+            <p className="text-lg font-semibold text-white">{usage?.posts_generated ?? 0}</p>
           </div>
           <div>
-            <p className="text-xs uppercase tracking-wide text-slate-500">Published this month</p>
-            <p className="text-lg font-semibold text-slate-900">{usage?.posts_published ?? 0}</p>
+            <p className="text-xs uppercase tracking-wide text-slate-400">Published this month</p>
+            <p className="text-lg font-semibold text-white">{usage?.posts_published ?? 0}</p>
           </div>
         </CardContent>
       </Card>
 
       <div>
-        <h2 className="mb-3 text-sm font-semibold text-slate-900">Plans</h2>
+        <h2 className="mb-3 text-sm font-semibold text-white">Plans</h2>
         <div className="grid gap-4 sm:grid-cols-3">
           {(plans ?? []).map((plan) => (
             <PlanCard

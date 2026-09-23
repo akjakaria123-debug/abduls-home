@@ -41,28 +41,28 @@ export function Topbar({
   }
 
   return (
-    <header className="flex h-16 items-center justify-between border-b border-slate-200 bg-white px-4 sm:px-6 lg:px-8">
-      <div className="text-sm font-medium text-slate-900">{businessName}</div>
+    <header className="flex h-16 items-center justify-between border-b border-white/5 bg-[#0A0E22] px-4 sm:px-6 lg:px-8">
+      <div className="text-sm font-medium text-white">{businessName}</div>
 
       <div className="flex items-center gap-4">
         <div className="relative">
           <button
             type="button"
             onClick={toggleBell}
-            className="relative rounded-full p-2 text-slate-500 hover:bg-slate-100"
+            className="relative cursor-pointer rounded-full p-2 text-slate-400 hover:bg-white/10 hover:text-white"
             aria-label={unreadCount > 0 ? `Notifications (${unreadCount} unread)` : 'Notifications'}
           >
             <Bell className="h-5 w-5" />
             {unreadCount > 0 && (
-              <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-semibold text-white">
+              <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500/100 px-1 text-[10px] font-semibold text-white">
                 {unreadCount > 9 ? '9+' : unreadCount}
               </span>
             )}
           </button>
 
           {bellOpen && (
-            <div className="absolute right-0 z-20 mt-2 w-80 rounded-lg border border-slate-200 bg-white py-1 shadow-lg">
-              <div className="border-b border-slate-100 px-3 py-2 text-xs font-semibold text-slate-700">
+            <div className="absolute right-0 z-20 mt-2 w-80 rounded-lg border border-white/10 bg-[#111634] py-1 shadow-xl">
+              <div className="border-b border-white/5 px-3 py-2 text-xs font-semibold text-slate-200">
                 Notifications
               </div>
 
@@ -71,9 +71,9 @@ export function Topbar({
                   {notifications.map((notification) => (
                     <li
                       key={notification.id}
-                      className="border-b border-slate-50 px-3 py-2 last:border-0"
+                      className="border-b border-white/5 px-3 py-2 last:border-0"
                     >
-                      <p className="text-xs text-slate-700">{notification.message}</p>
+                      <p className="text-xs text-slate-300">{notification.message}</p>
                       <p className="mt-0.5 text-[11px] text-slate-400">
                         {new Date(notification.createdAt).toLocaleString('en-AU', {
                           day: 'numeric',
@@ -101,23 +101,23 @@ export function Topbar({
               setMenuOpen((open) => !open);
               setBellOpen(false);
             }}
-            className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-slate-700 hover:bg-slate-50"
+            className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-slate-300 hover:bg-white/5"
           >
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-100 text-sm font-semibold text-brand-700">
+            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-fuchsia-500 text-sm font-semibold text-white">
               {userEmail.charAt(0).toUpperCase()}
             </span>
             <ChevronDown className="h-4 w-4" />
           </button>
 
           {menuOpen && (
-            <div className="absolute right-0 z-20 mt-2 w-56 rounded-lg border border-slate-200 bg-white py-1 shadow-lg">
-              <div className="truncate border-b border-slate-100 px-3 py-2 text-xs text-slate-500">
+            <div className="absolute right-0 z-20 mt-2 w-56 rounded-lg border border-white/10 bg-[#111634] py-1 shadow-xl">
+              <div className="truncate border-b border-white/5 px-3 py-2 text-xs text-slate-400">
                 {userEmail}
               </div>
               <form action={signOutAction}>
                 <button
                   type="submit"
-                  className="flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
+                  className="flex w-full cursor-pointer items-center gap-2 px-3 py-2 text-sm text-slate-300 hover:bg-white/5 hover:text-white"
                 >
                   <LogOut className="h-4 w-4" />
                   Log out
