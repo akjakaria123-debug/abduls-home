@@ -53,14 +53,27 @@ export async function GET(request: Request) {
     return NextResponse.redirect(`${origin}/onboarding`);
   }
 
+  // Filled in as the handshake progresses so a failure can say how far it
+  // got. Meta's own errors name a field, never the step, and diagnosing
+  // this blind costs the owner a round trip per guess.
+  let grantedScopes: string[] = [];
+  let reachedStep = 'starting';
+
   try {
+    reachedStep = 'exchanging the code for a token';
     const shortLived = await exchangeCodeForUserToken(code, facebookRedirectUri());
     const longLived = await exchangeForLongLivedUserToken(shortLived.access_token);
+
     // Check what was actually granted before using it, so a declined or
     // skipped permission is reported as such rather than surfacing later
     // as an unrelated-looking Graph API error.
-    const grantedScopes = await assertPageScopesGranted(longLived.access_token);
+    reachedStep = 'checking granted permissions';
+    grantedScopes = await assertPageScopesGranted(longLived.access_token);
+
+    reachedStep = 'reading the Facebook user';
     const metaUserId = await fetchMetaUserId(longLived.access_token);
+
+    reachedStep = 'listing Pages';
     const pages = await fetchUserPages(longLived.access_token);
 
     await logApiCall({
@@ -129,10 +142,16 @@ export async function GET(request: Request) {
 
     return back('connected=1');
   } catch (error) {
-    const message =
+    const raw =
       error instanceof MissingPermissionsError || error instanceof MetaGraphError
         ? error.message
         : 'Something went wrong connecting Facebook.';
+
+    // Report the step and the permissions Facebook actually handed over
+    // alongside its message. Which of these is empty is usually the whole
+    // diagnosis.
+    const granted = grantedScopes.length ? grantedScopes.join(', ') : 'none';
+    const message = `[${reachedStep}] ${raw} (granted: ${granted})`;
 
     await logApiCall({
       businessId: business.id,
