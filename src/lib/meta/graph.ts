@@ -132,11 +132,20 @@ export interface FacebookPageSummary {
 
 const MAX_PAGE_REQUESTS = 10;
 
-export async function fetchUserPages(userAccessToken: string): Promise<FacebookPageSummary[]> {
+interface PageListResponse {
+  data?: FacebookPageSummary[];
+  paging?: { next?: string };
+}
+
+// Walk the /me/accounts edge, following paging, asking for `fields`.
+async function listAccounts(
+  userAccessToken: string,
+  fields: string
+): Promise<FacebookPageSummary[]> {
   const pages: FacebookPageSummary[] = [];
 
   const first = new URL(`${GRAPH_BASE}/me/accounts`);
-  first.searchParams.set('fields', 'id,name,access_token,tasks');
+  first.searchParams.set('fields', fields);
   first.searchParams.set('limit', '100');
   first.searchParams.set('access_token', userAccessToken);
 
@@ -145,10 +154,7 @@ export async function fetchUserPages(userAccessToken: string): Promise<FacebookP
 
   while (next && requests < MAX_PAGE_REQUESTS) {
     const response = await fetch(next, { cache: 'no-store' });
-    const body = (await response.json().catch(() => ({}))) as {
-      data?: FacebookPageSummary[];
-      paging?: { next?: string };
-    } & GraphErrorBody;
+    const body = (await response.json().catch(() => ({}))) as PageListResponse & GraphErrorBody;
 
     if (!response.ok || body.error) {
       throw new MetaGraphError(
@@ -164,6 +170,46 @@ export async function fetchUserPages(userAccessToken: string): Promise<FacebookP
   }
 
   return pages;
+}
+
+// Some app configurations refuse `access_token` as a field on the
+// accounts edge and answer with error 100, "Tried accessing nonexisting
+// field (access_token)", even though the Page tokens are there to be had
+// one Page at a time. Recognising that shape lets us fall back rather
+// than telling the owner their Pages cannot be read.
+function isMissingAccessTokenField(error: unknown): boolean {
+  return (
+    error instanceof MetaGraphError &&
+    error.code === 100 &&
+    /nonexisting field \(access_token\)/i.test(error.message)
+  );
+}
+
+export async function fetchUserPages(userAccessToken: string): Promise<FacebookPageSummary[]> {
+  try {
+    return await listAccounts(userAccessToken, 'id,name,access_token,tasks');
+  } catch (error) {
+    if (!isMissingAccessTokenField(error)) throw error;
+  }
+
+  // Fallback: list the Pages without their tokens, then ask each Page
+  // node for its own token. Slower by one request per Page, but it is the
+  // documented way to obtain a Page token and it works where the
+  // combined call does not.
+  const pages = await listAccounts(userAccessToken, 'id,name,tasks');
+
+  const withTokens = await Promise.all(
+    pages.map(async (page) => {
+      const { access_token } = await graphGet<{ access_token: string }>(`/${page.id}`, {
+        fields: 'access_token',
+        access_token: userAccessToken,
+      });
+
+      return { ...page, access_token };
+    })
+  );
+
+  return withTokens;
 }
 
 export interface TokenDebugInfo {
