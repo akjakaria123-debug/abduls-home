@@ -50,8 +50,15 @@ export class AIProviderError extends Error {
   }
 }
 
+export interface ChatMessage {
+  role: 'system' | 'user' | 'assistant';
+  content: string;
+}
+
 export interface AIProvider {
   /** Recorded on each post so you can trace which model wrote what. */
   readonly model: string;
   generatePosts(input: GeneratePostsInput): Promise<GeneratedPostDraft[]>;
+  /** Free-form reply. Used by the in-app assistant, which wants prose. */
+  chat(messages: ChatMessage[]): Promise<string>;
 }

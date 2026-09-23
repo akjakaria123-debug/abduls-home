@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { Sidebar } from '@/components/layout/sidebar';
 import { Topbar } from '@/components/layout/topbar';
+import { ChatWidget } from '@/components/assistant/chat-widget';
 import { signOutAction } from '@/lib/actions/auth';
 
 export default async function AppLayout({ children }: { children: ReactNode }) {
@@ -83,6 +84,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
         />
         <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8">{children}</main>
       </div>
+      <ChatWidget />
     </div>
   );
 }

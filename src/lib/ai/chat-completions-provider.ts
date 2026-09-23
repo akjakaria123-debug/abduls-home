@@ -3,6 +3,7 @@ import { z } from 'zod';
 import {
   AIProviderError,
   type AIProvider,
+  type ChatMessage,
   type GeneratePostsInput,
   type GeneratedPostDraft,
 } from '@/lib/ai/provider';
@@ -62,7 +63,7 @@ export class ChatCompletionsProvider implements AIProvider {
     this.model = config.model;
   }
 
-  private async send(messages: unknown, useJsonMode: boolean) {
+  private async send(messages: unknown, useJsonMode: boolean, temperature: number) {
     const response = await fetch(`${this.baseUrl}/chat/completions`, {
       method: 'POST',
       cache: 'no-store',
@@ -72,7 +73,7 @@ export class ChatCompletionsProvider implements AIProvider {
       },
       body: JSON.stringify({
         model: this.model,
-        temperature: 0.9,
+        temperature,
         ...(useJsonMode ? { response_format: { type: 'json_object' } } : {}),
         messages,
       }),
@@ -105,16 +106,16 @@ export class ChatCompletionsProvider implements AIProvider {
    *
    * Two short waits, bounded well inside a serverless function's budget.
    */
-  private async post(messages: unknown, useJsonMode: boolean) {
+  private async post(messages: unknown, useJsonMode: boolean, temperature: number) {
     const RETRY_STATUSES = new Set([429, 500, 502, 503, 504]);
     const BACKOFF_MS = [800, 2000];
 
-    let attempt = await this.send(messages, useJsonMode);
+    let attempt = await this.send(messages, useJsonMode, temperature);
 
     for (const wait of BACKOFF_MS) {
       if (attempt.ok || !RETRY_STATUSES.has(attempt.status)) break;
       await new Promise((resolve) => setTimeout(resolve, wait));
-      attempt = await this.send(messages, useJsonMode);
+      attempt = await this.send(messages, useJsonMode, temperature);
     }
 
     return attempt;
@@ -126,14 +127,14 @@ export class ChatCompletionsProvider implements AIProvider {
       { role: 'user', content: buildUserPrompt(input) },
     ];
 
-    let attempt = await this.post(messages, true);
+    let attempt = await this.post(messages, true, 0.9);
 
     // JSON mode is an optimisation, not a requirement: the prompt already
     // specifies the exact shape and the reply is validated either way.
     // Vendors that do not accept response_format reject the whole request
     // over it, so drop it and ask again rather than failing outright.
     if (!attempt.ok && attempt.status === 400 && /response_format/i.test(attempt.text)) {
-      attempt = await this.post(messages, false);
+      attempt = await this.post(messages, false, 0.9);
     }
 
     const { ok, status, body, text } = attempt;
@@ -179,4 +180,33 @@ export class ChatCompletionsProvider implements AIProvider {
       imagePrompt: draft.imagePrompt?.trim() || null,
     }));
   }
+
+  /**
+   * A plain conversational reply.
+   *
+   * No JSON mode and a lower temperature than post generation: the
+   * assistant is answering questions about someone's own account, where
+   * being consistent matters more than being surprising.
+   */
+  async chat(messages: ChatMessage[]): Promise<string> {
+    const { ok, status, body } = await this.post(messages, false, 0.4);
+
+    if (!ok) {
+      const reported = body?.error?.message ?? body?.message;
+      throw new AIProviderError(
+        reported
+          ? `${reported} (HTTP ${status}, model ${this.model})`
+          : `The AI provider rejected the request: HTTP ${status}, model ${this.model}.`,
+        status
+      );
+    }
+
+    const content = body?.choices?.[0]?.message?.content;
+    if (typeof content !== 'string' || !content.trim()) {
+      throw new AIProviderError('The AI provider returned an empty response.');
+    }
+
+    return content.trim();
+  }
+
 }
