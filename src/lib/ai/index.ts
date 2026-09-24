@@ -28,10 +28,17 @@ const VENDORS = {
     label: 'Groq',
     baseUrl: 'https://api.groq.com/openai/v1',
     keyVar: 'GROQ_API_KEY',
-    // Free tier, no card. Runs open Llama models on Groq's own hardware
-    // rather than reselling capacity on someone else's, which is why it
-    // does not share Gemini's free-tier "experiencing high demand" 503s.
-    defaultModel: 'llama-3.3-70b-versatile',
+    // Free tier, no card. Runs open models on Groq's own hardware rather
+    // than reselling capacity on someone else's, which is why it does
+    // not share Gemini's free-tier "experiencing high demand" 503s.
+    //
+    // Groq decommissions models on a schedule of its own — the previous
+    // default here, llama-3.3-70b-versatile, was retired on the free
+    // tier on 2026-08-16 and now answers 404 "does not exist or you do
+    // not have access to it". gpt-oss-120b is its recommended
+    // replacement. When this happens again, AI_MODEL overrides it
+    // without a deploy.
+    defaultModel: 'openai/gpt-oss-120b',
   },
 } as const;
 
