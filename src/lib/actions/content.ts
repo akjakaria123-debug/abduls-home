@@ -10,6 +10,7 @@ import { buildCategoryMix } from '@/lib/ai/category-mix';
 import { loadGenerationContext, loadRecentPosts } from '@/lib/ai/context';
 import { buildScheduleSlots } from '@/lib/scheduling/slots';
 import { getPostsPerDayLimit } from '@/lib/plans';
+import { buildImageUrl, randomSeed } from '@/lib/images/pollinations';
 import {
   brandProfileSchema,
   contentPreferencesSchema,
@@ -22,7 +23,7 @@ export type ContentActionResult = { error: string } | { success: true; message?:
 
 export type PreviewResult =
   | { error: string }
-  | { success: true; draft: GeneratedPostDraft };
+  | { success: true; draft: GeneratedPostDraft; imageUrl: string | null };
 
 async function getOwnedBusinessId(supabase: ReturnType<typeof createClient>) {
   const {
@@ -327,6 +328,12 @@ export async function generatePostsAction(
     hashtags: draft.hashtags,
     image_idea: draft.imageIdea,
     image_prompt: draft.imagePrompt,
+    // Just a URL — nothing is generated or fetched yet. The image
+    // itself is produced lazily, the first time this URL is requested
+    // (a preview in the browser, or Facebook's own servers at publish
+    // time), and the same URL keeps producing the same image after
+    // that because the seed is fixed.
+    image_url: draft.imagePrompt ? buildImageUrl(draft.imagePrompt, randomSeed()) : null,
     status,
     scheduled_at: openSlots[index].toISOString(),
     ai_model: modelUsed,
@@ -415,7 +422,8 @@ export async function previewPostAction(): Promise<PreviewResult> {
     const draft = drafts[0];
     if (!draft) return { error: 'The AI returned no usable post. Please try again.' };
 
-    return { success: true, draft };
+    const imageUrl = draft.imagePrompt ? buildImageUrl(draft.imagePrompt, randomSeed()) : null;
+    return { success: true, draft, imageUrl };
   } catch (error) {
     const message =
       error instanceof AIProviderError

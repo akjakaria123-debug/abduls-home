@@ -54,7 +54,7 @@ export default async function CalendarPage({
     supabase
       .from('posts')
       .select(
-        'id, category, caption, cta, hashtags, image_idea, status, scheduled_at, facebook_page_id, facebook_post_id, error_message'
+        'id, category, caption, cta, hashtags, image_idea, image_prompt, image_url, status, scheduled_at, facebook_page_id, facebook_post_id, error_message'
       )
       .eq('business_id', business.id)
       .gte('scheduled_at', range.start.toISOString())
@@ -63,7 +63,7 @@ export default async function CalendarPage({
     supabase
       .from('posts')
       .select(
-        'id, category, caption, cta, hashtags, image_idea, status, scheduled_at, facebook_page_id, facebook_post_id, error_message'
+        'id, category, caption, cta, hashtags, image_idea, image_prompt, image_url, status, scheduled_at, facebook_page_id, facebook_post_id, error_message'
       )
       .eq('business_id', business.id)
       .is('scheduled_at', null)
@@ -81,6 +81,8 @@ export default async function CalendarPage({
     cta: row.cta,
     hashtags: row.hashtags,
     imageIdea: row.image_idea,
+    imagePrompt: row.image_prompt,
+    imageUrl: row.image_url,
     status: row.status,
     scheduledAt: row.scheduled_at,
     facebookPostId: row.facebook_post_id,

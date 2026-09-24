@@ -18,7 +18,7 @@ export default async function AdminPricingPage() {
         </p>
       </div>
 
-      <p className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+      <p className="rounded-lg border border-amber-400/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">
         Editing a price here changes what new customers are shown and charged. It does not change
         what existing subscribers pay — that lives in Stripe, and changing it there means migrating
         them to a new Price.

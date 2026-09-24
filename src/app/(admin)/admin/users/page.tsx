@@ -63,7 +63,7 @@ export default async function AdminUsersPage() {
                     <td className="px-3 py-3 text-slate-300">{business?.name ?? '—'}</td>
                     <td className="px-3 py-3">
                       {suspended ? (
-                        <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700">
+                        <span className="rounded-full bg-red-500/15 px-2 py-0.5 text-xs font-medium text-red-200">
                           Suspended
                         </span>
                       ) : (

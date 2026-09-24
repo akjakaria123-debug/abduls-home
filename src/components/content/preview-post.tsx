@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
+import Image from 'next/image';
 import { Sparkles } from 'lucide-react';
 import { previewPostAction } from '@/lib/actions/content';
 import type { GeneratedPostDraft } from '@/lib/ai/provider';
@@ -15,6 +16,7 @@ import { Button } from '@/components/ui/button';
  */
 export function PreviewPost() {
   const [draft, setDraft] = useState<GeneratedPostDraft | null>(null);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
@@ -24,10 +26,12 @@ export function PreviewPost() {
       const result = await previewPostAction();
       if ('error' in result) {
         setDraft(null);
+        setImageUrl(null);
         setError(result.error);
         return;
       }
       setDraft(result.draft);
+      setImageUrl(result.imageUrl);
     });
   }
 
@@ -46,6 +50,19 @@ export function PreviewPost() {
             {draft.category.replace(/_/g, ' ')}
           </span>
 
+          {imageUrl && (
+            <div className="relative mt-3 aspect-square w-full overflow-hidden rounded-lg bg-white/5">
+              <Image
+                src={imageUrl}
+                alt={draft.imageIdea ?? 'AI-generated sample photo'}
+                fill
+                sizes="(min-width: 640px) 480px, 90vw"
+                className="object-cover"
+                unoptimized
+              />
+            </div>
+          )}
+
           <p className="mt-3 whitespace-pre-wrap text-sm text-white">{draft.caption}</p>
 
           {draft.cta && <p className="mt-2 text-sm font-medium text-white">{draft.cta}</p>}
@@ -56,7 +73,7 @@ export function PreviewPost() {
             </p>
           )}
 
-          {draft.imageIdea && (
+          {!imageUrl && draft.imageIdea && (
             <p className="mt-3 border-t border-white/5 pt-3 text-xs text-slate-400">
               Image idea: {draft.imageIdea}
             </p>

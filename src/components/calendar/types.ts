@@ -5,6 +5,8 @@ export interface CalendarPost {
   cta: string | null;
   hashtags: string[];
   imageIdea: string | null;
+  imagePrompt: string | null;
+  imageUrl: string | null;
   status: string;
   scheduledAt: string | null;
   facebookPostId: string | null;
@@ -13,19 +15,19 @@ export interface CalendarPost {
 }
 
 export const STATUS_STYLES: Record<string, string> = {
-  draft: 'bg-slate-100 text-slate-600',
-  approved: 'bg-amber-100 text-amber-700',
-  scheduled: 'bg-brand-100 text-brand-700',
-  published: 'bg-emerald-100 text-emerald-700',
-  failed: 'bg-red-100 text-red-700',
+  draft: 'bg-white/10 text-slate-300',
+  approved: 'bg-amber-500/15 text-amber-200',
+  scheduled: 'bg-indigo-500/20 text-indigo-200',
+  published: 'bg-emerald-500/15 text-emerald-200',
+  failed: 'bg-red-500/15 text-red-200',
 };
 
 export const STATUS_DOTS: Record<string, string> = {
   draft: 'bg-slate-400',
-  approved: 'bg-amber-500',
-  scheduled: 'bg-brand-500',
-  published: 'bg-emerald-500',
-  failed: 'bg-red-500',
+  approved: 'bg-amber-400',
+  scheduled: 'bg-indigo-400',
+  published: 'bg-emerald-400',
+  failed: 'bg-red-400',
 };
 
 export function formatTime(iso: string, timeZone: string): string {

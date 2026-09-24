@@ -1,8 +1,10 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { Trash2 } from 'lucide-react';
+import Image from 'next/image';
+import { RefreshCw, Trash2 } from 'lucide-react';
 import { deletePostAction } from '@/lib/actions/content';
+import { regenerateImageAction } from '@/lib/actions/posts';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 
@@ -10,8 +12,8 @@ const STATUS_STYLES: Record<string, string> = {
   draft: 'bg-white/10 text-slate-300',
   approved: 'bg-blue-500/15 text-blue-200',
   scheduled: 'bg-indigo-500/20 text-indigo-200',
-  published: 'bg-emerald-500/100/15 text-emerald-200',
-  failed: 'bg-red-500/100/15 text-red-200',
+  published: 'bg-emerald-500/15 text-emerald-200',
+  failed: 'bg-red-500/15 text-red-200',
 };
 
 export interface PostCardData {
@@ -21,6 +23,8 @@ export interface PostCardData {
   cta: string | null;
   hashtags: string[];
   imageIdea: string | null;
+  imagePrompt: string | null;
+  imageUrl: string | null;
   status: string;
   scheduledAt: string | null;
   timezone: string;
@@ -28,22 +32,41 @@ export interface PostCardData {
 
 export function PostCard({ post }: { post: PostCardData }) {
   const [deleted, setDeleted] = useState(false);
+  const [imageUrl, setImageUrl] = useState(post.imageUrl);
   const [error, setError] = useState<string | null>(null);
-  const [isPending, startTransition] = useTransition();
+  const [isDeleting, startDelete] = useTransition();
+  const [isRegeneratingImage, startImageRegen] = useTransition();
 
   if (deleted) return null;
+
+  const isPending = isDeleting || isRegeneratingImage;
+  const canEditImage = post.status !== 'published' && Boolean(post.imagePrompt);
 
   function handleDelete() {
     if (!window.confirm('Delete this post?')) return;
 
     setError(null);
-    startTransition(async () => {
+    startDelete(async () => {
       const result = await deletePostAction(post.id);
       if ('error' in result) {
         setError(result.error);
         return;
       }
       setDeleted(true);
+    });
+  }
+
+  function handleRegenerateImage() {
+    setError(null);
+    startImageRegen(async () => {
+      const result = await regenerateImageAction(post.id);
+      if ('error' in result) {
+        setError(result.error);
+        return;
+      }
+      // The seed is chosen server-side, so the new URL has to come from
+      // the action's result rather than being rebuilt here.
+      setImageUrl(result.imageUrl);
     });
   }
 
@@ -88,6 +111,30 @@ export function PostCard({ post }: { post: PostCardData }) {
           </button>
         </div>
 
+        {imageUrl && (
+          <div className="relative aspect-square w-full overflow-hidden rounded-lg bg-white/5">
+            <Image
+              src={imageUrl}
+              alt={post.imageIdea ?? 'AI-generated photo for this post'}
+              fill
+              sizes="(min-width: 1024px) 320px, 90vw"
+              className="object-cover"
+              unoptimized
+            />
+            {canEditImage && (
+              <button
+                type="button"
+                onClick={handleRegenerateImage}
+                disabled={isPending}
+                className="absolute bottom-2 right-2 flex items-center gap-1.5 rounded-lg bg-black/60 px-2.5 py-1.5 text-xs font-medium text-white backdrop-blur transition-colors hover:bg-black/80 disabled:opacity-50"
+              >
+                <RefreshCw className={cn('h-3.5 w-3.5', isRegeneratingImage && 'animate-spin')} />
+                {isRegeneratingImage ? 'Generating…' : 'New photo'}
+              </button>
+            )}
+          </div>
+        )}
+
         <p className="whitespace-pre-wrap text-sm text-white">{post.caption}</p>
 
         {post.cta && <p className="text-sm font-medium text-white">{post.cta}</p>}
@@ -98,7 +145,7 @@ export function PostCard({ post }: { post: PostCardData }) {
           </p>
         )}
 
-        {post.imageIdea && (
+        {!imageUrl && post.imageIdea && (
           <p className="rounded-lg bg-white/[0.04] px-3 py-2 text-xs text-slate-400">
             Image idea: {post.imageIdea}
           </p>

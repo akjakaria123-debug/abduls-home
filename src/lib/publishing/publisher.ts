@@ -4,6 +4,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { decryptToken } from '@/lib/crypto/token-encryption';
 import { MetaGraphError, publishToPage } from '@/lib/meta/graph';
 import { logApiCall } from '@/lib/api-logs';
+import { ImageUnavailableError, warmImage } from '@/lib/images/pollinations';
 import { notifyBusinessOwner } from '@/lib/notifications';
 import { composePostMessage } from '@/lib/publishing/message';
 import { decideRetry, failureMessage, MAX_PUBLISH_ATTEMPTS } from '@/lib/publishing/retry';
@@ -17,7 +18,10 @@ export interface PublishRunSummary {
   published: number;
   retrying: number;
   failed: number;
+  deferred: number;
 }
+
+const PUBLISH_TIME_BUDGET_MS = 30_000;
 
 async function recordAttempt(
   admin: AdminClient,
@@ -132,10 +136,13 @@ async function publishOne(
   });
 
   try {
+    if (post.image_url) await warmImage(post.image_url);
+
     const result = await publishToPage(
       page.page_id,
       decryptToken(page.page_access_token_encrypted),
-      message
+      message,
+      post.image_url
     );
 
     await admin
@@ -162,7 +169,9 @@ async function publishOne(
     summary.published += 1;
   } catch (error) {
     const isGraphError = error instanceof MetaGraphError;
-    const detail = isGraphError ? error.message : 'Could not reach Facebook.';
+    const isImageError = error instanceof ImageUnavailableError;
+    const detail = isGraphError || isImageError ? error.message : 'Could not reach Facebook.';
+    // No status and no code for an image failure: retry.ts treats that as transient.
     const httpStatus = isGraphError ? error.status : null;
     const errorCode = isGraphError ? error.code ?? null : null;
 
@@ -173,8 +182,8 @@ async function publishOne(
     });
     await logApiCall({
       businessId: post.business_id,
-      service: 'meta',
-      endpoint: '/{page-id}/feed',
+      service: isImageError ? 'images' : 'meta',
+      endpoint: isImageError ? 'image warm-up' : '/{page-id}/feed',
       success: false,
       statusCode: httpStatus,
       errorMessage: detail,
@@ -219,7 +228,13 @@ async function publishOne(
  */
 export async function publishDuePosts(limit = 25): Promise<PublishRunSummary> {
   const admin = createAdminClient();
-  const summary: PublishRunSummary = { claimed: 0, published: 0, retrying: 0, failed: 0 };
+  const summary: PublishRunSummary = {
+    claimed: 0,
+    published: 0,
+    retrying: 0,
+    failed: 0,
+    deferred: 0,
+  };
 
   const { data: claimed, error } = await admin.rpc('claim_due_posts', {
     p_lock_token: randomUUID(),
@@ -233,11 +248,21 @@ export async function publishDuePosts(limit = 25): Promise<PublishRunSummary> {
   const posts = (claimed ?? []) as PostRow[];
   summary.claimed = posts.length;
   const ownerCache = new Map<string, string | null>();
+  const startedAt = Date.now();
 
   // Sequential on purpose: Meta rate-limits per Page, and a burst of
   // parallel writes is the fastest way to trip that.
-  for (const post of posts) {
-    await publishOne(admin, ownerCache, post, summary);
+  for (let i = 0; i < posts.length; i += 1) {
+    // An image warm-up can take up to 25s, and the route is killed at 60s.
+    // Stop early and hand the rest back so the next run picks them up now
+    // rather than after the 10-minute stale-lock window.
+    if (Date.now() - startedAt > PUBLISH_TIME_BUDGET_MS) {
+      const remaining = posts.slice(i).map((post) => post.id);
+      await admin.from('posts').update({ publish_lock_token: null }).in('id', remaining);
+      summary.deferred = remaining.length;
+      break;
+    }
+    await publishOne(admin, ownerCache, posts[i], summary);
   }
 
   return summary;

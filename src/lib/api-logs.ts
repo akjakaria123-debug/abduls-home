@@ -5,7 +5,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 // service-role client and read only by the admin dashboard.
 export async function logApiCall(params: {
   businessId?: string | null;
-  service: 'meta' | 'stripe' | 'openai';
+  service: 'meta' | 'stripe' | 'openai' | 'images';
   endpoint: string;
   success: boolean;
   statusCode?: number | null;

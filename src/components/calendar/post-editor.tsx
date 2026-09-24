@@ -1,12 +1,14 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 import { useFormState } from 'react-dom';
+import Image from 'next/image';
 import {
   CalendarClock,
   Check,
   Copy,
   ExternalLink,
+  Image as ImageIcon,
   Pencil,
   RefreshCw,
   RotateCcw,
@@ -16,6 +18,7 @@ import {
 import {
   approvePostAction,
   duplicatePostAction,
+  regenerateImageAction,
   regeneratePostAction,
   reschedulePostAction,
   retryPostAction,
@@ -61,6 +64,21 @@ export function PostEditor({ post, timezone }: { post: CalendarPost; timezone: s
   const [feedback, setFeedback] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const [imageUrl, setImageUrl] = useState(post.imageUrl);
+  const [isRegeneratingImage, startImageRegen] = useTransition();
+
+  // "Rewrite with AI" (below) also replaces the image, server-side. That
+  // arrives here as a new `post.imageUrl` prop after revalidatePath
+  // refreshes the page — useState only reads its argument on mount, so
+  // without this the photo would keep showing the one written for the
+  // caption before the rewrite.
+  useEffect(() => {
+    setImageUrl(post.imageUrl);
+  }, [post.imageUrl]);
+
+  // Both this and the image button write to the same row, so let either
+  // one block the other rather than racing.
+  const busy = isPending || isRegeneratingImage;
 
   const [updateState, updateAction] = useFormState(updatePostAction, initialState);
   const [rescheduleState, rescheduleAction] = useFormState(reschedulePostAction, initialState);
@@ -95,6 +113,21 @@ export function PostEditor({ post, timezone }: { post: CalendarPost; timezone: s
     run(() => deletePostAction(post.id), () => setRemoved(true));
   }
 
+  function handleRegenerateImage() {
+    setError(null);
+    setFeedback(null);
+    startImageRegen(async () => {
+      const result = await regenerateImageAction(post.id);
+      if ('error' in result) {
+        setError(result.error);
+        return;
+      }
+      // The seed is chosen server-side, so the new URL has to come from
+      // the action's result rather than being rebuilt here.
+      setImageUrl(result.imageUrl);
+    });
+  }
+
   return (
     <Card>
       <CardContent className="space-y-3">
@@ -122,7 +155,7 @@ export function PostEditor({ post, timezone }: { post: CalendarPost; timezone: s
               <button
                 type="button"
                 onClick={() => run(() => retryPostAction(post.id))}
-                disabled={isPending}
+                disabled={busy}
                 title="Try publishing again"
                 className="rounded-lg p-1.5 text-slate-400 hover:bg-emerald-500/10 hover:text-emerald-300 disabled:opacity-50"
               >
@@ -136,7 +169,7 @@ export function PostEditor({ post, timezone }: { post: CalendarPost; timezone: s
                   <button
                     type="button"
                     onClick={() => run(() => unapprovePostAction(post.id))}
-                    disabled={isPending}
+                    disabled={busy}
                     title="Move back to draft"
                     className="rounded-lg p-1.5 text-slate-400 hover:bg-white/5 hover:text-slate-300 disabled:opacity-50"
                   >
@@ -146,7 +179,7 @@ export function PostEditor({ post, timezone }: { post: CalendarPost; timezone: s
                   <button
                     type="button"
                     onClick={() => run(() => approvePostAction(post.id))}
-                    disabled={isPending}
+                    disabled={busy}
                     title="Approve"
                     className="rounded-lg p-1.5 text-slate-400 hover:bg-emerald-500/10 hover:text-emerald-300 disabled:opacity-50"
                   >
@@ -181,11 +214,11 @@ export function PostEditor({ post, timezone }: { post: CalendarPost; timezone: s
                 <button
                   type="button"
                   onClick={() => run(() => regeneratePostAction(post.id))}
-                  disabled={isPending}
+                  disabled={busy}
                   title="Rewrite with AI"
                   className="rounded-lg p-1.5 text-slate-400 hover:bg-white/5 hover:text-indigo-300 disabled:opacity-50"
                 >
-                  <RefreshCw className={cn('h-4 w-4', isPending && 'animate-spin')} />
+                  <RefreshCw className={cn('h-4 w-4', busy && 'animate-spin')} />
                 </button>
               </>
             )}
@@ -205,7 +238,7 @@ export function PostEditor({ post, timezone }: { post: CalendarPost; timezone: s
             <button
               type="button"
               onClick={() => run(() => duplicatePostAction(post.id))}
-              disabled={isPending}
+              disabled={busy}
               title="Duplicate"
               className="rounded-lg p-1.5 text-slate-400 hover:bg-white/5 hover:text-slate-300 disabled:opacity-50"
             >
@@ -215,7 +248,7 @@ export function PostEditor({ post, timezone }: { post: CalendarPost; timezone: s
             <button
               type="button"
               onClick={handleDelete}
-              disabled={isPending}
+              disabled={busy}
               title="Delete"
               className="rounded-lg p-1.5 text-slate-400 hover:bg-red-500/10 hover:text-red-300 disabled:opacity-50"
             >
@@ -223,6 +256,30 @@ export function PostEditor({ post, timezone }: { post: CalendarPost; timezone: s
             </button>
           </div>
         </div>
+
+        {imageUrl && (
+          <div className="relative aspect-square w-full max-w-xs overflow-hidden rounded-lg bg-white/5">
+            <Image
+              src={imageUrl}
+              alt={post.imageIdea ?? 'AI-generated photo for this post'}
+              fill
+              sizes="320px"
+              className="object-cover"
+              unoptimized
+            />
+            {!isPublished && post.imagePrompt && (
+              <button
+                type="button"
+                onClick={handleRegenerateImage}
+                disabled={busy}
+                className="absolute bottom-2 right-2 flex items-center gap-1.5 rounded-lg bg-black/60 px-2.5 py-1.5 text-xs font-medium text-white backdrop-blur transition-colors hover:bg-black/80 disabled:opacity-50"
+              >
+                <ImageIcon className={cn('h-3.5 w-3.5', isRegeneratingImage && 'animate-spin')} />
+                {isRegeneratingImage ? 'Generating…' : 'New photo'}
+              </button>
+            )}
+          </div>
+        )}
 
         {editing ? (
           <form action={updateAction} className="space-y-3">
@@ -279,7 +336,7 @@ export function PostEditor({ post, timezone }: { post: CalendarPost; timezone: s
                 {post.hashtags.map((tag) => `#${tag}`).join(' ')}
               </p>
             )}
-            {post.imageIdea && (
+            {!imageUrl && post.imageIdea && (
               <p className="rounded-lg bg-white/[0.04] px-3 py-2 text-xs text-slate-400">
                 Image idea: {post.imageIdea}
               </p>
@@ -321,7 +378,7 @@ export function PostEditor({ post, timezone }: { post: CalendarPost; timezone: s
         )}
 
         {post.errorMessage && (
-          <p className="rounded-lg border border-red-400/30 bg-red-500/10 px-3 py-2 text-xs text-red-700">
+          <p className="rounded-lg border border-red-400/30 bg-red-500/10 px-3 py-2 text-xs text-red-200">
             {post.errorMessage}
           </p>
         )}

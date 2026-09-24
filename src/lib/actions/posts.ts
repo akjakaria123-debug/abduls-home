@@ -6,11 +6,14 @@ import { logApiCall } from '@/lib/api-logs';
 import { getAIProvider } from '@/lib/ai';
 import { AIProviderError } from '@/lib/ai/provider';
 import { loadGenerationContext, loadRecentPosts } from '@/lib/ai/context';
+import { buildImageUrl, randomSeed } from '@/lib/images/pollinations';
 import { zonedTimeToUtc } from '@/lib/scheduling/slots';
 import { parseHashtagInput, reschedulePostSchema, updatePostSchema } from '@/lib/validations/posts';
 import type { PostStatus } from '@/types/database.types';
 
 export type PostActionResult = { error: string } | { success: true; message?: string };
+
+export type RegenerateImageResult = { error: string } | { success: true; imageUrl: string };
 
 async function getOwnedBusinessId(supabase: ReturnType<typeof createClient>) {
   const {
@@ -35,7 +38,9 @@ async function loadOwnedPost(
 ) {
   const { data } = await supabase
     .from('posts')
-    .select('id, category, status, scheduled_at, facebook_page_id, caption, cta, hashtags, image_idea, image_prompt')
+    .select(
+      'id, category, status, scheduled_at, facebook_page_id, caption, cta, hashtags, image_idea, image_prompt, image_url'
+    )
     .eq('id', postId)
     .eq('business_id', businessId)
     .maybeSingle();
@@ -259,6 +264,7 @@ export async function duplicatePostAction(postId: string): Promise<PostActionRes
     hashtags: post.hashtags,
     image_idea: post.image_idea,
     image_prompt: post.image_prompt,
+    image_url: post.image_url,
     status: 'draft' as PostStatus,
     scheduled_at: null,
   });
@@ -343,6 +349,7 @@ export async function regeneratePostAction(postId: string): Promise<PostActionRe
       hashtags: draft.hashtags,
       image_idea: draft.imageIdea,
       image_prompt: draft.imagePrompt,
+      image_url: draft.imagePrompt ? buildImageUrl(draft.imagePrompt, randomSeed()) : null,
       ai_model: modelUsed,
       status,
       error_message: null,
@@ -354,4 +361,39 @@ export async function regeneratePostAction(postId: string): Promise<PostActionRe
 
   refreshViews();
   return { success: true, message: 'Rewritten.' };
+}
+
+/**
+ * Re-rolls just the photo, keeping the caption. Cheaper and faster than
+ * a full rewrite: no AI call, just a new random seed against the image
+ * prompt already on the post.
+ */
+export async function regenerateImageAction(postId: string): Promise<RegenerateImageResult> {
+  const supabase = createClient();
+  const businessId = await getOwnedBusinessId(supabase);
+  if (!businessId) return { error: 'Your session expired. Please log in again.' };
+
+  const post = await loadOwnedPost(supabase, businessId, postId);
+  if (!post) return { error: 'Post not found.' };
+  if (post.status === 'published') {
+    return { error: 'This post is already live on Facebook and can no longer be changed here.' };
+  }
+  if (!post.image_prompt) {
+    return { error: 'This post has no image idea to generate a photo from.' };
+  }
+
+  // The seed is chosen here, so the URL has to come back from here too —
+  // the client cannot construct the same one on its own.
+  const imageUrl = buildImageUrl(post.image_prompt, randomSeed());
+
+  const { error } = await supabase
+    .from('posts')
+    .update({ image_url: imageUrl })
+    .eq('id', post.id)
+    .eq('business_id', businessId);
+
+  if (error) return { error: 'Could not generate a new image.' };
+
+  refreshViews();
+  return { success: true, imageUrl };
 }

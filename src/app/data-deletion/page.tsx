@@ -32,16 +32,16 @@ export default async function DataDeletionPage({
         <div
           className={
             request
-              ? 'rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-4'
+              ? 'rounded-lg border border-emerald-400/30 bg-emerald-500/10 px-4 py-4'
               : 'rounded-lg border border-white/10 bg-white/[0.04] px-4 py-4'
           }
         >
           {request ? (
             <>
-              <p className="text-sm font-semibold text-emerald-900">
+              <p className="text-sm font-semibold text-emerald-200">
                 Deletion request {request.status === 'completed' ? 'completed' : request.status}
               </p>
-              <p className="mt-1 text-sm text-emerald-800">
+              <p className="mt-1 text-sm text-emerald-300">
                 Reference <span className="font-mono">{request.confirmation_code}</span>. Requested{' '}
                 {new Date(request.requested_at).toLocaleString('en-AU', { dateStyle: 'medium' })}
                 {request.completed_at

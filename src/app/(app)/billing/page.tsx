@@ -75,7 +75,7 @@ export default async function BillingPage({
       </div>
 
       {searchParams.checkout === 'success' && (
-        <p className="rounded-lg border border-emerald-400/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-700">
+        <p className="rounded-lg border border-emerald-400/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
           Thanks — your subscription is being set up. It may take a few seconds to appear here.
         </p>
       )}
@@ -86,7 +86,7 @@ export default async function BillingPage({
       )}
 
       {warning && (
-        <p className="rounded-lg border border-amber-400/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-800">
+        <p className="rounded-lg border border-amber-400/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">
           {warning}
         </p>
       )}

@@ -35,7 +35,7 @@ export default async function ContentPage() {
       .maybeSingle(),
     supabase
       .from('posts')
-      .select('id, category, caption, cta, hashtags, image_idea, status, scheduled_at')
+      .select('id, category, caption, cta, hashtags, image_idea, image_prompt, image_url, status, scheduled_at')
       .eq('business_id', business.id)
       .order('scheduled_at', { ascending: true, nullsFirst: false })
       .limit(60),
@@ -100,6 +100,8 @@ export default async function ContentPage() {
                 cta: post.cta,
                 hashtags: post.hashtags,
                 imageIdea: post.image_idea,
+                imagePrompt: post.image_prompt,
+                imageUrl: post.image_url,
                 status: post.status,
                 scheduledAt: post.scheduled_at,
                 timezone: business.timezone,

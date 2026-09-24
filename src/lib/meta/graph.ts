@@ -325,12 +325,67 @@ export async function assertPageScopesGranted(userAccessToken: string): Promise<
  * is what `pages_manage_posts` grants. Returns Meta's composite post id
  * ("{page-id}_{post-id}").
  */
+/**
+ * Uploads a photo to the Page's photo library without publishing it as
+ * its own post, so it can be attached to a feed post instead.
+ * `published: false` plus `attached_media` on /feed is Meta's documented
+ * way to combine a caption with a photo in one visible post — posting
+ * the photo on its own (published: true) would create a second, unwanted
+ * post with no caption.
+ */
+async function uploadUnpublishedPhoto(
+  pageId: string,
+  pageAccessToken: string,
+  imageUrl: string
+): Promise<{ id: string }> {
+  const body = new URLSearchParams({
+    url: imageUrl,
+    published: 'false',
+    access_token: pageAccessToken,
+  });
+
+  const response = await fetch(`${GRAPH_BASE}/${pageId}/photos`, {
+    method: 'POST',
+    cache: 'no-store',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body,
+  });
+
+  const payload = (await response.json().catch(() => ({}))) as { id?: string } & GraphErrorBody;
+
+  if (!response.ok || payload.error || !payload.id) {
+    throw new MetaGraphError(
+      payload.error?.message ?? 'Facebook rejected the image.',
+      response.status,
+      payload.error
+    );
+  }
+
+  return { id: payload.id };
+}
+
+/**
+ * Publishes a caption to a Page's feed, with an image attached when
+ * `imageUrl` is given.
+ *
+ * A failed image upload throws the same MetaGraphError a failed feed
+ * post would, so it takes the ordinary retry/failure path in the
+ * publisher rather than silently going out as text-only — an owner who
+ * approved a post because of its photo should not have it quietly
+ * publish without one.
+ */
 export async function publishToPage(
   pageId: string,
   pageAccessToken: string,
-  message: string
+  message: string,
+  imageUrl?: string | null
 ): Promise<{ id: string }> {
   const body = new URLSearchParams({ message, access_token: pageAccessToken });
+
+  if (imageUrl) {
+    const photo = await uploadUnpublishedPhoto(pageId, pageAccessToken, imageUrl);
+    body.set('attached_media', JSON.stringify([{ media_fbid: photo.id }]));
+  }
 
   const response = await fetch(`${GRAPH_BASE}/${pageId}/feed`, {
     method: 'POST',
