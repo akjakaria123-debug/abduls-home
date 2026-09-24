@@ -269,10 +269,17 @@ export async function generatePostsAction(
     recentCategories
   );
 
-  const provider = getAIProvider();
-
   let drafts;
+  let modelUsed = '';
   try {
+    // getAIProvider() throws synchronously when the configured vendor's
+    // key is missing — a misconfigured or not-yet-redeployed env var,
+    // not a bug in the request. It has to be inside this try: called
+    // above it, that throw was uncaught by this action and surfaced as
+    // Next.js's generic "server-side exception" page instead of the
+    // inline message below.
+    const provider = getAIProvider();
+    modelUsed = provider.model;
     drafts = await provider.generatePosts({
       business: context.business,
       brand: context.brand,
@@ -322,7 +329,7 @@ export async function generatePostsAction(
     image_prompt: draft.imagePrompt,
     status,
     scheduled_at: openSlots[index].toISOString(),
-    ai_model: provider.model,
+    ai_model: modelUsed,
   }));
 
   const { error: insertError } = await supabase.from('posts').insert(rows);

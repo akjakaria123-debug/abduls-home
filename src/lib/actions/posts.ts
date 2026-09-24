@@ -284,10 +284,17 @@ export async function regeneratePostAction(postId: string): Promise<PostActionRe
   if (!context) return { error: 'Finish setting up your business first.' };
 
   const recentRows = await loadRecentPosts(supabase, businessId);
-  const provider = getAIProvider();
 
   let drafts;
+  let modelUsed = '';
   try {
+    // getAIProvider() throws synchronously when the configured vendor's
+    // key is missing. Called outside this try, that throw is uncaught
+    // and surfaces as Next.js's generic "server-side exception" page
+    // instead of the inline message below — see generatePostsAction in
+    // content.ts, which had the same bug.
+    const provider = getAIProvider();
+    modelUsed = provider.model;
     drafts = await provider.generatePosts({
       business: context.business,
       brand: context.brand,
@@ -336,7 +343,7 @@ export async function regeneratePostAction(postId: string): Promise<PostActionRe
       hashtags: draft.hashtags,
       image_idea: draft.imageIdea,
       image_prompt: draft.imagePrompt,
-      ai_model: provider.model,
+      ai_model: modelUsed,
       status,
       error_message: null,
     })
