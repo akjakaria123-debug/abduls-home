@@ -177,7 +177,8 @@ export class ChatCompletionsProvider implements AIProvider {
       cta: draft.cta?.trim() || null,
       hashtags: (draft.hashtags ?? []).map(normaliseHashtag).filter(Boolean).slice(0, 6),
       imageIdea: draft.imageIdea?.trim() || null,
-      imagePrompt: draft.imagePrompt?.trim() || null,
+      // Some models skip the separate prompt; the idea is a usable prompt on its own.
+      imagePrompt: draft.imagePrompt?.trim() || draft.imageIdea?.trim() || null,
     }));
   }
 

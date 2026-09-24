@@ -378,13 +378,14 @@ export async function regenerateImageAction(postId: string): Promise<RegenerateI
   if (post.status === 'published') {
     return { error: 'This post is already live on Facebook and can no longer be changed here.' };
   }
-  if (!post.image_prompt) {
+  const prompt = post.image_prompt || post.image_idea;
+  if (!prompt) {
     return { error: 'This post has no image idea to generate a photo from.' };
   }
 
   // The seed is chosen here, so the URL has to come back from here too —
   // the client cannot construct the same one on its own.
-  const imageUrl = buildImageUrl(post.image_prompt, randomSeed());
+  const imageUrl = buildImageUrl(prompt, randomSeed());
 
   const { error } = await supabase
     .from('posts')

@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import Image from 'next/image';
-import { RefreshCw, Trash2 } from 'lucide-react';
+import { ImagePlus, RefreshCw, Trash2 } from 'lucide-react';
 import { deletePostAction } from '@/lib/actions/content';
 import { regenerateImageAction } from '@/lib/actions/posts';
 import { Card, CardContent } from '@/components/ui/card';
@@ -40,7 +40,8 @@ export function PostCard({ post }: { post: PostCardData }) {
   if (deleted) return null;
 
   const isPending = isDeleting || isRegeneratingImage;
-  const canEditImage = post.status !== 'published' && Boolean(post.imagePrompt);
+  const canEditImage =
+    post.status !== 'published' && Boolean(post.imagePrompt || post.imageIdea);
 
   function handleDelete() {
     if (!window.confirm('Delete this post?')) return;
@@ -146,9 +147,20 @@ export function PostCard({ post }: { post: PostCardData }) {
         )}
 
         {!imageUrl && post.imageIdea && (
-          <p className="rounded-lg bg-white/[0.04] px-3 py-2 text-xs text-slate-400">
-            Image idea: {post.imageIdea}
-          </p>
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-white/[0.04] px-3 py-2">
+            <p className="text-xs text-slate-400">Image idea: {post.imageIdea}</p>
+            {canEditImage && (
+              <button
+                type="button"
+                onClick={handleRegenerateImage}
+                disabled={isPending}
+                className="flex items-center gap-1.5 rounded-lg bg-indigo-500/20 px-2.5 py-1.5 text-xs font-medium text-indigo-200 transition-colors hover:bg-indigo-500/30 disabled:opacity-50"
+              >
+                <ImagePlus className={cn('h-3.5 w-3.5', isRegeneratingImage && 'animate-pulse')} />
+                {isRegeneratingImage ? 'Creating…' : 'Create photo'}
+              </button>
+            )}
+          </div>
         )}
 
         {error && <p className="text-xs text-red-300">{error}</p>}

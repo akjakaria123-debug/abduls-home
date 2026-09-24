@@ -86,6 +86,7 @@ export function PostEditor({ post, timezone }: { post: CalendarPost; timezone: s
   if (removed) return null;
 
   const isPublished = post.status === 'published';
+  const canEditImage = !isPublished && Boolean(post.imagePrompt || post.imageIdea);
   const isScheduled = post.status === 'scheduled';
   const isFailed = post.status === 'failed';
 
@@ -257,7 +258,7 @@ export function PostEditor({ post, timezone }: { post: CalendarPost; timezone: s
           </div>
         </div>
 
-        {imageUrl && (
+        {imageUrl ? (
           <div className="relative aspect-square w-full max-w-xs overflow-hidden rounded-lg bg-white/5">
             <Image
               src={imageUrl}
@@ -267,7 +268,7 @@ export function PostEditor({ post, timezone }: { post: CalendarPost; timezone: s
               className="object-cover"
               unoptimized
             />
-            {!isPublished && post.imagePrompt && (
+            {canEditImage && (
               <button
                 type="button"
                 onClick={handleRegenerateImage}
@@ -279,6 +280,18 @@ export function PostEditor({ post, timezone }: { post: CalendarPost; timezone: s
               </button>
             )}
           </div>
+        ) : (
+          canEditImage && (
+            <button
+              type="button"
+              onClick={handleRegenerateImage}
+              disabled={busy}
+              className="flex items-center gap-1.5 rounded-lg bg-indigo-500/20 px-2.5 py-1.5 text-xs font-medium text-indigo-200 transition-colors hover:bg-indigo-500/30 disabled:opacity-50"
+            >
+              <ImageIcon className={cn('h-3.5 w-3.5', isRegeneratingImage && 'animate-pulse')} />
+              {isRegeneratingImage ? 'Creating…' : 'Create photo'}
+            </button>
+          )
         )}
 
         {editing ? (
