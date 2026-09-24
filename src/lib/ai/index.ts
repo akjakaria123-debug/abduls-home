@@ -24,6 +24,15 @@ const VENDORS = {
     // this without a deploy when it happens again.
     defaultModel: 'gemini-3.6-flash',
   },
+  groq: {
+    label: 'Groq',
+    baseUrl: 'https://api.groq.com/openai/v1',
+    keyVar: 'GROQ_API_KEY',
+    // Free tier, no card. Runs open Llama models on Groq's own hardware
+    // rather than reselling capacity on someone else's, which is why it
+    // does not share Gemini's free-tier "experiencing high demand" 503s.
+    defaultModel: 'llama-3.3-70b-versatile',
+  },
 } as const;
 
 export type VendorName = keyof typeof VENDORS;
